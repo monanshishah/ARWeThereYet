@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ARWeThereYet_SE4450</string>
+    <string name="access_token">pk.eyJ1IjoiamFrc2FrOCIsImEiOiJjazVlc2h4MDgyYWduM2xwMzN0d2V2b3l2In0.kGX8pl1i97hbPP48u8pi4Q</string>
 </resources>
