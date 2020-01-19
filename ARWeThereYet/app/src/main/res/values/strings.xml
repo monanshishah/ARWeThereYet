@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">ARWeThereYet_SE4450</string>
     <string name="access_token">pk.eyJ1IjoiYXJpYmFzaWxvbmUiLCJhIjoiY2syeG56OXljMHNiZDNscGcxYXNlM3N5diJ9.15eYQuehqi4v8yLlIvt42g</string>
+    <string name="click_on_map_instruction">Select Place on Map</string>
+    <string name="query_feature_no_properties_found">Query Feat - No properties Error Msg</string>
+    <string name="query_feature_marker_title">Marker Title</string>
 </resources>
