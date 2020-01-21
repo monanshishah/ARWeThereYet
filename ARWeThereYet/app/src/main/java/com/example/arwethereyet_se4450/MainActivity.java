@@ -28,6 +28,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -70,13 +71,18 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
 
-    private static final long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
-    private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     private MapView mapView;
     private MapboxMap mapboxMap;
+    // Variables needed to handle location permissions
     private PermissionsManager permissionsManager;
+    // Location engine variables
     private LocationEngine locationEngine;
-    private LocationChangeListeningActivityLocationCallback callback = new LocationChangeListeningActivityLocationCallback(this);
+    private static final long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
+    private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
+    // Variables needed to listen to location updates
+    private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
+
+
 
     //specific var for pin query
     private static final String GEOJSON_SOURCE_ID = "GEOJSON_SOURCE_ID";//"ck58iqryj01px2nk0t6mca66g";
@@ -112,9 +118,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //new LoadGeoJsonDataTask(MainActivity.this).execute();
                 setUpData();
                 mapboxMap.addOnMapClickListener(MainActivity.this);
+                enableLocationComponent(style);
                 Toast.makeText(MainActivity.this,
                         getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
-
+             
             }
         });
 
@@ -382,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
+
      * Utility class to generate Bitmaps for Symbol.
      */
     private static class SymbolGenerator {
@@ -411,11 +419,63 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     //end of pin query sect
 
     private static class LocationChangeListeningActivityLocationCallback
+
+     * Initialize the Maps SDK's LocationComponent
+     */
+    @SuppressWarnings( {"MissingPermission"})
+    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
+        // Check if permissions are enabled and if not request
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            // Get an instance of the component
+            LocationComponent locationComponent = mapboxMap.getLocationComponent();
+
+            // Set the LocationComponent activation options
+            LocationComponentActivationOptions locationComponentActivationOptions =
+                    LocationComponentActivationOptions.builder(this, loadedMapStyle)
+                            .useDefaultLocationEngine(false)
+                            .build();
+
+            // Activate with the LocationComponentActivationOptions object
+            locationComponent.activateLocationComponent(locationComponentActivationOptions);
+
+            // Enable to make component visible
+            locationComponent.setLocationComponentEnabled(true);
+
+            // Set the component's camera mode
+            locationComponent.setCameraMode(CameraMode.TRACKING);
+
+            // Set the component's render mode
+            locationComponent.setRenderMode(RenderMode.COMPASS);
+
+            initLocationEngine();
+        } else {
+            permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(this);
+        }
+
+    }
+
+    /**
+     * Set up the LocationEngine and the parameters for querying the device's location
+     */
+    @SuppressLint("MissingPermission")
+    private void initLocationEngine() {
+        locationEngine = LocationEngineProvider.getBestLocationEngine(this);
+
+        LocationEngineRequest request = new LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME).build();
+
+        locationEngine.requestLocationUpdates(request, callback, getMainLooper());
+        locationEngine.getLastLocation(callback);
+    }
+
+    private static class MainActivityLocationCallback
             implements LocationEngineCallback<LocationEngineResult> {
 
         private final WeakReference<MainActivity> activityWeakReference;
 
-        LocationChangeListeningActivityLocationCallback(MainActivity activity) {
+        MainActivityLocationCallback(MainActivity activity) {
             this.activityWeakReference = new WeakReference<>(activity);
         }
 
@@ -424,6 +484,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
          *
          * @param result the LocationEngineResult object which has the last known location within it.
          */
+        @SuppressLint("StringFormatInvalid")
         @Override
         public void onSuccess(LocationEngineResult result) {
             MainActivity activity = activityWeakReference.get();
@@ -435,11 +496,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return;
                 }
 
-//                // Create a Toast which displays the new location's coordinates
-//                Toast.makeText(activity, String.format(activity.getString(R.string.new_location),
-//                        String.valueOf(result.getLastLocation().getLatitude()),
-//                        String.valueOf(result.getLastLocation().getLongitude())),
-//                        Toast.LENGTH_SHORT).show();
+
+                // Create a Toast which displays the new location's coordinates
+                Toast.makeText(activity, String.format(activity.getString(R.string.new_location),
+                        String.valueOf(result.getLastLocation().getLatitude()), String.valueOf(result.getLastLocation().getLongitude())),
+                        Toast.LENGTH_SHORT).show();
 
                 // Pass the new location to the Maps SDK's LocationComponent
                 if (activity.mapboxMap != null && result.getLastLocation() != null) {
@@ -449,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         /**
-         * The LocationEngineCallback interface's method which fires when the device's location can't be captured
+         * The LocationEngineCallback interface's method which fires when the device's location can not be captured
          *
          * @param exception the exception message
          */
@@ -463,6 +524,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
+
 
 
     @Override
@@ -504,13 +566,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Prevent leaks
+        if (locationEngine != null) {
+            locationEngine.removeLocationUpdates(callback);
+        }
         mapView.onDestroy();
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toast.makeText(this, "good",
-                Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -520,7 +590,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 enableLocationComponent(mapboxMap.getStyle());
             }
         } else {
-            Toast.makeText(this, "bad", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -580,3 +650,4 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 }
+
