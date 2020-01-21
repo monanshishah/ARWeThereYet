@@ -29,17 +29,14 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
 //specific imports for pin query
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -52,12 +49,10 @@ import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.annotations.BubbleLayout;
 import com.mapbox.mapboxsdk.annotations.Marker;
-import com.mapbox.mapboxsdk.style.sources.Source;
 
 import java.util.HashMap;
 
@@ -264,57 +259,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /**
-     * AsyncTask to load data from the assets folder.
-     */
-//    private static class LoadGeoJsonDataTask extends AsyncTask<Void, Void, FeatureCollection> {
-//
-//        private final WeakReference<MainActivity> activityRef;
-//
-//        LoadGeoJsonDataTask(MainActivity activity) {
-//            this.activityRef = new WeakReference<>(activity);
-//        }
-//
-//        @Override
-//        protected FeatureCollection doInBackground(Void... params) {
-//            MainActivity activity = activityRef.get();
-//
-//            if (activity == null) {
-//                return null;
-//            }
-//
-//            String geoJson = loadGeoJsonFromAsset(activity, "CapstoneV1.geojson");
-//            //Log.i(TAG,geoJson);
-//            // note it doesn't log all feats
-//            return FeatureCollection.fromJson(geoJson);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(FeatureCollection featureCollection) {
-//            super.onPostExecute(featureCollection);
-//            MainActivity activity = activityRef.get();
-//            if (featureCollection == null || activity == null) {
-//                return;
-//            }
-//
-//            activity.setUpData(featureCollection);
-//            new GenerateViewIconTask(activity).execute(featureCollection);
-//        }
-
-//        static String loadGeoJsonFromAsset(Context context, String filename) {
-//            try {
-//                // Load GeoJSON file from local asset folder
-//                InputStream is = context.getAssets().open(filename);
-//                int size = is.available();
-//                byte[] buffer = new byte[size];
-//                is.read(buffer);
-//                is.close();
-//                return new String(buffer, Charset.forName("UTF-8"));
-//            } catch (Exception exception) {
-//                throw new RuntimeException(exception);
-//            }
-//        }
-//    }
 
     private static class GenerateViewIconTask extends AsyncTask<FeatureCollection, Void, HashMap<String, Bitmap>> {
 
