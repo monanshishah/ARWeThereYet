@@ -4,4 +4,8 @@
     <string name="user_location_permission_explanation">EXPLANATION_HERE</string>
     <string name="user_location_permission_not_granted">not granted</string>
     <string name="new_location">location</string>
+    <string name="styleURI">mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71</string>
+    <string name="click_on_map_instruction">Select Place on Map</string>
+    <string name="query_feature_no_properties_found">Query Feat - No properties Error Msg</string>
+    <string name="query_feature_marker_title">Marker Title</string>
 </resources>
