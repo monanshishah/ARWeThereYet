@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     StringBuilder stringBuilder = new StringBuilder();
 
-                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main_win_sym, null);
+                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main, null);
 
                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
                     titleTextView.setText(activity.getString(R.string.query_feature_marker_title));
@@ -567,6 +567,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
             mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             Toast.makeText(getApplicationContext(), address.getLatitude() + " " + address.getLongitude(), Toast.LENGTH_LONG).show();
+
         }
     }
 
