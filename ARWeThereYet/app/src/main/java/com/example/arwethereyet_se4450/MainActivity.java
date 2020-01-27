@@ -74,10 +74,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
 
-    private static final String GEOJSON_SOURCE_ID = null ;
-    private static final String TAG = null;
-    private static final String CALLOUT_LAYER_ID = null;
-    private static final String CALLOUT_IMAGE_ID = null;
+
     private MapView mapView;
     private MapboxMap mapboxMap;
     // Variables needed to handle location permissions
@@ -88,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     // Variables needed to listen to location updates
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
-    GeoJsonSource source;
 
 
     //specific var for pin query
@@ -133,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
             }
         });
-
     }
 
     //for pin query
@@ -305,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     StringBuilder stringBuilder = new StringBuilder();
 
-                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main, null);
+                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main_win_sym, null);
 
                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
                     titleTextView.setText(activity.getString(R.string.query_feature_marker_title));
@@ -575,6 +570,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //list of points of interest
 //        List<Feature> features = source.querySourceFeatures(Expression.get("name");
 
+
         if (location != null || !location.equals("")) {
             Geocoder geocoder = new Geocoder(this);
             try {
@@ -589,6 +585,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
             mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             Toast.makeText(getApplicationContext(), address.getLatitude() + " " + address.getLongitude(), Toast.LENGTH_LONG).show();
+            
 
         }
     }
