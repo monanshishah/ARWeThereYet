@@ -570,6 +570,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //list of points of interest
 //        List<Feature> features = source.querySourceFeatures(Expression.get("name");
 
+
         if (location != null || !location.equals("")) {
             Geocoder geocoder = new Geocoder(this);
             try {
