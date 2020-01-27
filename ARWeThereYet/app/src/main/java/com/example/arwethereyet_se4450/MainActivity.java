@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -21,7 +20,9 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -31,7 +32,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
+
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -73,10 +74,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
 
-    private static final String GEOJSON_SOURCE_ID = null ;
-    private static final String TAG = null;
-    private static final String CALLOUT_LAYER_ID = null;
-    private static final String CALLOUT_IMAGE_ID = null;
+
     private MapView mapView;
     private MapboxMap mapboxMap;
     // Variables needed to handle location permissions
@@ -87,7 +85,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     // Variables needed to listen to location updates
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
-    GeoJsonSource source;
+
+
+    //specific var for pin query
+    private static final String GEOJSON_SOURCE_ID = "GEOJSON_SOURCE_ID";//"ck58iqryj01px2nk0t6mca66g";
+//    private static final String MARKER_IMAGE_ID = "MARKER_IMAGE_ID"; //for non deprecated
+    private static final String CALLOUT_IMAGE_ID = "CALLOUT_IMAGE_ID";
+//    private static final String MARKER_LAYER_ID = "MARKER_LAYER_ID";
+    private static final String CALLOUT_LAYER_ID = "CALLOUT_LAYER_ID";
+    private GeoJsonSource source;
+
+
+    //pin query youtube
+//    private Location ogLoc;
+    private Point origin,dest;
+    private Marker destM;
+    private static String TAG = "TAG";
 
 
 
@@ -109,6 +122,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onStyleLoaded(@NonNull Style style) {
                 // Map is set up and the style has loaded. Now you can add data or make other map adjustments
                 enableLocationComponent(style);
+
+                setUpData();
+                mapboxMap.addOnMapClickListener(MainActivity.this);
+                Toast.makeText(MainActivity.this,
+                        getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
             }
         });
     }
