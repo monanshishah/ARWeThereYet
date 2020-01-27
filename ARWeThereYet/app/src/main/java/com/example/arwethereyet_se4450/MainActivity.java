@@ -4,9 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
@@ -17,6 +20,9 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -28,9 +34,11 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.AbstractSequentialList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,12 +56,14 @@ import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.annotations.BubbleLayout;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
 import java.util.HashMap;
+import java.util.concurrent.Future;
 
 import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
@@ -64,6 +74,10 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
 
+    private static final String GEOJSON_SOURCE_ID = null ;
+    private static final String TAG = null;
+    private static final String CALLOUT_LAYER_ID = null;
+    private static final String CALLOUT_IMAGE_ID = null;
     private MapView mapView;
     private MapboxMap mapboxMap;
     // Variables needed to handle location permissions
@@ -74,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     // Variables needed to listen to location updates
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
+    GeoJsonSource source;
 
 
     //specific var for pin query
@@ -178,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Needed to show the Feature properties info window.
      */
     private void refreshSource(Feature featureAtClickPoint) {
+
         if (source != null) {
             source.setGeoJson(featureAtClickPoint);
         }
@@ -241,11 +257,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
+        Marker destM = null;
         if(destM != null){
             mapboxMap.removeMarker(destM);
         }
         destM = mapboxMap.addMarker(new MarkerOptions().position(point));
-        dest = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+        Point dest = Point.fromLngLat(point.getLongitude(), point.getLatitude());
 //        origin = Point.fromLngLat(ogLoc.getLongitude(), ogLoc.getLatitude());
         //supposedly black icon/marker is an emulator issue, alt has to deal with deprecation of Marker
 
@@ -288,8 +305,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     StringBuilder stringBuilder = new StringBuilder();
 
-                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(
-                            R.layout.activity_main_win_sym, null);
+                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main, null);
 
                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
                     titleTextView.setText(activity.getString(R.string.query_feature_marker_title));
@@ -537,6 +553,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             permissionsManager.requestLocationPermissions(this);
         }
     }
+
+
+    public void searchLocation(View view) {
+
+//        GeoJsonSource source = null;
+        List<Address> addressList = null;
+
+
+//        try {
+//            source = new GeoJsonSource("source", new URI("asset://CapstoneV1.geojson"));
+//            Log.i(TAG, source.toString());
+//        } catch (URISyntaxException exception) {
+//            Log.d(TAG, "exception");
+//        }
+
+        //get text from textbox
+        EditText locationSearch = (EditText) findViewById(R.id.editText);
+        String location = locationSearch.getText().toString();
+
+        //list of points of interest
+//        List<Feature> features = source.querySourceFeatures(Expression.get("name");
+
+        if (location != null || !location.equals("")) {
+            Geocoder geocoder = new Geocoder(this);
+            try {
+                //match text from textbox to POI list
+                addressList = geocoder.getFromLocationName(location, 1);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Address address = addressList.get(0);
+            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
+            mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            Toast.makeText(getApplicationContext(), address.getLatitude() + " " + address.getLongitude(), Toast.LENGTH_LONG).show();
+
+        }
+    }
+
 
 }
 
