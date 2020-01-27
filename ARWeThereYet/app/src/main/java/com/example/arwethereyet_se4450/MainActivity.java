@@ -111,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 enableLocationComponent(style);
             }
         });
-
     }
 
     //for pin query
@@ -283,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     StringBuilder stringBuilder = new StringBuilder();
 
-                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main, null);
+                    BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main_win_sym, null);
 
                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
                     titleTextView.setText(activity.getString(R.string.query_feature_marker_title));
