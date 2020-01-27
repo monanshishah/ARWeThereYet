@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,8 +17,6 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -79,21 +76,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-    //specific var for pin query
-    private static final String GEOJSON_SOURCE_ID = "GEOJSON_SOURCE_ID";//"ck58iqryj01px2nk0t6mca66g";
-    private static final String MARKER_IMAGE_ID = "MARKER_IMAGE_ID";
-    private static final String CALLOUT_IMAGE_ID = "CALLOUT_IMAGE_ID";
-    private static final String MARKER_LAYER_ID = "MARKER_LAYER_ID";
-    private static final String CALLOUT_LAYER_ID = "CALLOUT_LAYER_ID";
-    private GeoJsonSource source;
-    private FeatureCollection featCollect;
-
-    //pin query youtube
-//    private Location ogLoc;
-    private Point origin,dest;
-    private Marker destM;
-    private static String TAG = "TAG";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,16 +89,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        mapboxMap.setStyle(new Style.Builder().fromUri(getString(R.string.styleURI)),new Style.OnStyleLoaded(){
+        mapboxMap.setStyle(new Style.Builder().fromUri("mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71"), new Style.OnStyleLoaded() {
             @Override
             public void onStyleLoaded(@NonNull Style style) {
-                //new LoadGeoJsonDataTask(MainActivity.this).execute();
-                setUpData();
-                mapboxMap.addOnMapClickListener(MainActivity.this);
+                // Map is set up and the style has loaded. Now you can add data or make other map adjustments
                 enableLocationComponent(style);
-                Toast.makeText(MainActivity.this,
-                        getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
-             
             }
         });
 
@@ -362,7 +339,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //end of pin query sect
 
-
     private static class MainActivityLocationCallback
             implements LocationEngineCallback<LocationEngineResult> {
 
@@ -483,6 +459,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             finish();
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
