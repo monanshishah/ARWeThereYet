@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -72,6 +73,11 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacem
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
+//AR
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.content.Intent;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
 
 
@@ -103,6 +109,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static String TAG = "TAG";
 
 
+    //ar var
+    Button arB;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +121,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
+        //AR
+//        arB = (Button) findViewById(R.id.button_ar_nav);
+//        arB.setOnClickListener(new OnClickListener() {
+//            public void onClick(View arg0) {
+//
+//                // Start NewActivity.class
+//                Intent myIntent = new Intent(MainActivity.this, ARPage.class);
+//                startActivity(myIntent);
+//                finish();
+//            }
+//        });
+    }
+
+    public void arClick(View view){
+        Intent myIntent = new Intent(MainActivity.this, ARPage.class);
+        startActivity(myIntent);
+        finish();
+
     }
 
     @Override
@@ -252,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
-        Marker destM = null;
         if(destM != null){
             mapboxMap.removeMarker(destM);
         }
@@ -582,7 +609,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             Address address = addressList.get(0);
             LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-            mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
+
+            //one marker at a time
+            if(destM != null){
+                mapboxMap.removeMarker(destM);
+            }
+            destM = mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
+
+
             mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             Toast.makeText(getApplicationContext(), address.getLatitude() + " " + address.getLongitude(), Toast.LENGTH_LONG).show();
             

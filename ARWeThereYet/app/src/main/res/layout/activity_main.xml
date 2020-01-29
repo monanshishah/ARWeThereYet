@@ -11,25 +11,29 @@
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        mapbox:mapbox_cameraZoom="15"
         mapbox:mapbox_cameraTargetLat="43.0095971"
         mapbox:mapbox_cameraTargetLng="-81.2737336"
-        />
+        mapbox:mapbox_cameraZoom="15"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="366dp">
+
+    </com.mapbox.mapboxsdk.maps.MapView>
 <!--        mapbox:mapbox_styleURL="mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71"/>-->
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         tools:ignore="MissingConstraints">
 
         <EditText
+            android:id="@+id/editText"
             android:layout_width="248dp"
             android:layout_height="wrap_content"
-            android:id="@+id/editText"
             android:layout_weight="0.5"
-            android:inputType="textPersonName"
-            android:hint="Search Location" />
+            android:hint="Search Location"
+            android:inputType="textPersonName" />
 
         <Button
             android:layout_width="wrap_content"
@@ -40,6 +44,25 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="500dp"
+        android:orientation="horizontal"
+        mapbox:layout_constraintBottom_toBottomOf="parent"
+        mapbox:layout_constraintStart_toStartOf="parent"
+        mapbox:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/button_ar_nav"
+            android:layout_width="399dp"
+            android:layout_height="77dp"
+            android:onClick="arClick"
+            android:text="AR Nav"
+            android:visibility="visible"
+            tools:visibility="visible" />
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
