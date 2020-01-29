@@ -13,36 +13,28 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="43.0095971"
         mapbox:mapbox_cameraTargetLng="-81.2737336"
-        mapbox:mapbox_cameraZoom="15"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="366dp">
-
-    </com.mapbox.mapboxsdk.maps.MapView>
-<!--        mapbox:mapbox_styleURL="mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71"/>-->
-
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        tools:ignore="MissingConstraints">
-
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="248dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:hint="Search Location"
-            android:inputType="textPersonName" />
 
         <Button
+            android:id="@+id/startButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:enabled="false"
+            android:text="Start navigation"
+            android:background="@color/mapboxGrayLight"
+            android:textColor="@color/mapboxWhite"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_location_search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:onClick="searchLocation"
-            android:text="Search" />
-
-    </LinearLayout>
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:tint="@android:color/white"
+            app:backgroundTint="@color/colorPrimary"
+            app:srcCompat="@android:drawable/ic_search_category_default"
+            tools:ignore="MissingConstraints" />
+    </com.mapbox.mapboxsdk.maps.MapView>
 
     <LinearLayout
         android:id="@+id/linearLayout2"

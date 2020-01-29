@@ -1,29 +1,48 @@
 package com.example.arwethereyet_se4450;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+
 import android.location.Address;
 import android.location.Geocoder;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PointF;
+
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.EditText;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.gson.JsonElement;
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEngineCallback;
-import com.mapbox.android.core.location.LocationEngineProvider;
-import com.mapbox.android.core.location.LocationEngineRequest;
-import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+
+
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.BubbleLayout;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -33,15 +52,17 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.AbstractSequentialList;
+
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+
 
 //specific imports for pin query
 import android.graphics.Bitmap;
@@ -57,14 +78,11 @@ import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.annotations.BubbleLayout;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
-import java.util.HashMap;
-import java.util.concurrent.Future;
 
 import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
@@ -73,10 +91,31 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacem
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
+
 //AR
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.content.Intent;
+
+
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions;
+
+// classes to calculate a route
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import com.mapbox.api.geocoding.v5.GeocodingCriteria;
+
+
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
 
@@ -85,12 +124,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapboxMap mapboxMap;
     // Variables needed to handle location permissions
     private PermissionsManager permissionsManager;
+    private LocationComponent locationComponent;
     // Location engine variables
     private LocationEngine locationEngine;
     private static final long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     // Variables needed to listen to location updates
-    private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
+//    private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
 
 
     //specific var for pin query
@@ -101,12 +141,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String CALLOUT_LAYER_ID = "CALLOUT_LAYER_ID";
     private GeoJsonSource source;
 
+    //SEARCHING FUNCTIONALITY
+    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
+    private String symbolIconId = "symbolIconId";
+
 
     //pin query youtube
 //    private Location ogLoc;
-    private Point origin,dest;
+    private Point origindest;
     private Marker destM;
-    private static String TAG = "TAG";
+
+    // variables for calculating and drawing a route
+    private DirectionsRoute currentRoute;
+    private static final String TAG = "DirectionsActivity";
+    private NavigationMapRoute navigationMapRoute;
+
+    // variables needed to initialize navigation
+    private Button button;
 
 
     //ar var
@@ -146,18 +197,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         mapboxMap.setStyle(new Style.Builder().fromUri("mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71"), new Style.OnStyleLoaded() {
-            @Override
-            public void onStyleLoaded(@NonNull Style style) {
-                // Map is set up and the style has loaded. Now you can add data or make other map adjustments
-                enableLocationComponent(style);
 
-                setUpData();
-                mapboxMap.addOnMapClickListener(MainActivity.this);
-                Toast.makeText(MainActivity.this,
-                        getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
-            }
+                    @Override
+                    public void onStyleLoaded(@NonNull Style style) {
+                        // Map is set up and the style has loaded. Now you can add data or make other map adjustments
+                        enableLocationComponent(style);
+                        setUpData();
+                        initSearchFab();
+
+                        mapboxMap.addOnMapClickListener(MainActivity.this);
+                        Toast.makeText(MainActivity.this,
+                                getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
+                        button = findViewById(R.id.startButton);
+                        button.setOnClickListener(v -> {
+                            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                                    .directionsRoute(currentRoute)
+                                    .shouldSimulateRoute(true)
+                                    .build();
+                            // Call this method with Context from within an Activity
+                            NavigationLauncher.startNavigation(MainActivity.this, options);
+                        });
+                    }
         });
     }
+
 
     //for pin query
     /**
@@ -170,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
              mapboxMap.getStyle(style -> {
                  setupSource(style);
                  setUpInfoWindowLayer(style);
+                 setupLayer(style);
              });
          }
      }
@@ -225,6 +289,83 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            source.setGeoJson(featCollect);
 //        }
     }
+    private void initSearchFab() {
+        findViewById(R.id.fab_location_search).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new PlaceAutocomplete.IntentBuilder()
+                        .accessToken(Mapbox.getAccessToken() != null ? Mapbox.getAccessToken() : getString(R.string.access_token))
+                        .placeOptions(PlaceOptions.builder()
+                                .bbox(-81.28432464432893,42.99455346126038,-81.2664676815399,43.014377673454874)
+                                .backgroundColor(Color.parseColor("#EEEEEE"))
+                                .limit(10)
+                                .build(PlaceOptions.MODE_CARDS))
+                        .build(MainActivity.this);
+                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+            }
+        });
+    }
+
+    //layer for search icon
+    private void setupLayer(@NonNull Style loadedMapStyle) {
+        loadedMapStyle.addLayer(new SymbolLayer("SYMBOL_LAYER_ID", GEOJSON_SOURCE_ID).withProperties(
+                iconImage(symbolIconId),
+                iconOffset(new Float[] {0f, -8f})
+        ));
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE) {
+
+            // Retrieve selected location's CarmenFeature
+            CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+
+            if(destM != null)
+                mapboxMap.removeMarker(destM);
+
+            // Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above.
+            // Then retrieve and update the source designated for showing a selected location's symbol layer icon
+            if (mapboxMap != null) {
+                Style style = mapboxMap.getStyle();
+                if (style != null) {
+                    if (source != null) {
+                        source.setGeoJson(FeatureCollection.fromFeatures(
+                                new Feature[] {Feature.fromJson(selectedCarmenFeature.toJson())}));
+                    }
+
+                    // Move map camera to the selected location
+                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(
+                            new CameraPosition.Builder()
+                                    .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                                            ((Point) selectedCarmenFeature.geometry()).longitude()))
+                                    .zoom(14)
+                                    .build()), 4000);
+                }
+
+                destM = mapboxMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                                ((Point) selectedCarmenFeature.geometry()).longitude())));
+
+                LatLng searchPoint = new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                        ((Point) selectedCarmenFeature.geometry()).longitude());
+
+                Point destinationPoint = Point.fromLngLat(searchPoint.getLongitude(), searchPoint.getLatitude());
+
+                Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                        locationComponent.getLastKnownLocation().getLatitude());
+                getRoute(originPoint, destinationPoint);
+
+                button.setEnabled(true);
+                button.setBackgroundResource(R.color.mapboxBlue);
+            }
+        }
+    }
+
+
+
 
     /**
      * Adds a SymbolLayer to the map to show the Feature properties info window.
@@ -232,20 +373,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void setUpInfoWindowLayer(@NonNull Style loadedStyle) {
         loadedStyle.addLayer(new SymbolLayer(CALLOUT_LAYER_ID, GEOJSON_SOURCE_ID)
                 .withProperties(
-// show image with id title based on the value of the name feature property
+                        // show image with id title based on the value of the name feature property
                         iconImage(CALLOUT_IMAGE_ID),
 
-// set anchor of icon to bottom-left
+                        // set anchor of icon to bottom-left
                         iconAnchor(ICON_ANCHOR_BOTTOM),
 
-// prevent the feature property window icon from being visible even
-// if it collides with other previously drawn symbols
+                        // prevent the feature property window icon from being visible even
+                        // if it collides with other previously drawn symbols
                         iconAllowOverlap(false),
 
-// prevent other symbols from being visible even if they collide with the feature property window icon
+                        // prevent other symbols from being visible even if they collide with the feature property window icon
                         iconIgnorePlacement(false),
 
-// offset the info window to be above the marker
+                        // offset the info window to be above the marker
                         iconOffset(new Float[] {-2f, -28f})
                 ));
     }
@@ -284,11 +425,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.removeMarker(destM);
         }
         destM = mapboxMap.addMarker(new MarkerOptions().position(point));
-        Point dest = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+//        Point dest = Point.fromLngLat(point.getLongitude(), point.getLatitude());
 //        origin = Point.fromLngLat(ogLoc.getLongitude(), ogLoc.getLatitude());
         //supposedly black icon/marker is an emulator issue, alt has to deal with deprecation of Marker
 
         //return true;
+
+        Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+        Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                locationComponent.getLastKnownLocation().getLatitude());
+        getRoute(originPoint, destinationPoint);
+
+        button.setEnabled(true);
+        button.setBackgroundResource(R.color.mapboxBlue);
+
         return handleClickIcon(mapboxMap.getProjection().toScreenLocation(point));
     }
 
@@ -397,65 +547,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    //end of pin query sect
-
-    private static class MainActivityLocationCallback
-            implements LocationEngineCallback<LocationEngineResult> {
-
-        private final WeakReference<MainActivity> activityWeakReference;
-
-        MainActivityLocationCallback(MainActivity activity) {
-            this.activityWeakReference = new WeakReference<>(activity);
-        }
-
-        /**
-         * The LocationEngineCallback interface's method which fires when the device's location has changed.
-         *
-         * @param result the LocationEngineResult object which has the last known location within it.
-         */
-        @SuppressLint("StringFormatInvalid")
-        @Override
-        public void onSuccess(LocationEngineResult result) {
-            MainActivity activity = activityWeakReference.get();
-
-            if (activity != null) {
-                Location location = result.getLastLocation();
-
-                if (location == null) {
-                    return;
-                }
-
-
-                // Create a Toast which displays the new location's coordinates
-//                Toast.makeText(activity, String.format(activity.getString(R.string.new_location),
-//                        String.valueOf(result.getLastLocation().getLatitude()), String.valueOf(result.getLastLocation().getLongitude())),
-//                        Toast.LENGTH_SHORT).show();
-
-                // Pass the new location to the Maps SDK's LocationComponent
-                if (activity.mapboxMap != null && result.getLastLocation() != null) {
-                    activity.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
-                }
-            }
-        }
-
-        /**
-         * The LocationEngineCallback interface's method which fires when the device's location can not be captured
-         *
-         * @param exception the exception message
-         */
-        @Override
-        public void onFailure(@NonNull Exception exception) {
-            Log.d("LocationChangeActivity", exception.getLocalizedMessage());
-            MainActivity activity = activityWeakReference.get();
-            if (activity != null) {
-                Toast.makeText(activity, exception.getLocalizedMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-
-
     @Override
     protected void onStart(){
         super.onStart();
@@ -496,12 +587,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onDestroy() {
         super.onDestroy();
         // Prevent leaks
-        if (locationEngine != null) {
-            locationEngine.removeLocationUpdates(callback);
-        }
+//        if (locationEngine != null) {
+//            locationEngine.removeLocationUpdates(callback);
+//        }
         mapView.onDestroy();
     }
 
+
+    /**
+     * Initialize the Maps SDK's LocationComponent
+     */
+    @SuppressWarnings( {"MissingPermission"})
+    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
+        // Check if permissions are enabled and if not request
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+
+            // Get an instance of the component
+            locationComponent = mapboxMap.getLocationComponent();
+
+            // Set the LocationComponent activation options
+            LocationComponentActivationOptions locationComponentActivationOptions =
+                    LocationComponentActivationOptions.builder(this, loadedMapStyle)
+                            .useDefaultLocationEngine(true)
+                            .build();
+
+            // Activate with the LocationComponentActivationOptions object
+            locationComponent.activateLocationComponent(locationComponentActivationOptions);
+
+            // Enable to make component visible
+            locationComponent.setLocationComponentEnabled(true);
+
+            // Set the component's camera mode
+            locationComponent.setCameraMode(CameraMode.TRACKING);
+
+            // Set the component's render mode
+            locationComponent.setRenderMode(RenderMode.COMPASS);
+//
+//            initLocationEngine();
+        } else {
+            permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(this);
+        }
+    }
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
@@ -520,108 +647,60 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @SuppressLint("MissingPermission")
-    private void initLocationEngine() {
-        locationEngine = LocationEngineProvider.getBestLocationEngine(this);
-
-        LocationEngineRequest request = new LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME).build();
-
-        locationEngine.requestLocationUpdates(request, callback, getMainLooper());
-        locationEngine.getLastLocation(callback);
-    }
+    /**
+     * End of location component
+     *
+     */
 
 
     /**
-     * Initialize the Maps SDK's LocationComponent
+     * Routing functions
+     *
      */
-    @SuppressWarnings( {"MissingPermission"})
-    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-        // Check if permissions are enabled and if not request
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
 
-            // Get an instance of the component
-            LocationComponent locationComponent = mapboxMap.getLocationComponent();
+    private void getRoute(Point origin, Point destination) {
+        NavigationRoute.builder(this)
+                .accessToken(Mapbox.getAccessToken())
+                .origin(origin)
+                .destination(destination)
+                .build()
+                .getRoute(new Callback<DirectionsResponse>() {
+                    @Override
+                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                        // You can get the generic HTTP info about the response
+                        Log.d(TAG, "Response code: " + response.code());
+                        if (response.body() == null) {
+                            Log.e(TAG, "No routes found, make sure you set the right user and access token.");
+                            return;
+                        } else if (response.body().routes().size() < 1) {
+                            Log.e(TAG, "No routes found");
+                            return;
+                        }
 
-            // Set the LocationComponent activation options
-            LocationComponentActivationOptions locationComponentActivationOptions =
-                    LocationComponentActivationOptions.builder(this, loadedMapStyle)
-                            .useDefaultLocationEngine(false)
-                            .build();
-
-            // Activate with the LocationComponentActivationOptions object
-            locationComponent.activateLocationComponent(locationComponentActivationOptions);
-
-            // Enable to make component visible
-            locationComponent.setLocationComponentEnabled(true);
-
-            // Set the component's camera mode
-            locationComponent.setCameraMode(CameraMode.TRACKING);
-
-            // Set the component's render mode
-            locationComponent.setRenderMode(RenderMode.COMPASS);
-
-            initLocationEngine();
-        } else {
-            permissionsManager = new PermissionsManager(this);
-            permissionsManager.requestLocationPermissions(this);
-        }
-    }
+                        currentRoute = response.body().routes().get(0);
 
 
-    public void searchLocation(View view) {
-
-//        GeoJsonSource source = null;
-        List<Address> addressList = null;
-
-
-//        try {
-//            source = new GeoJsonSource("source", new URI("asset://CapstoneV1.geojson"));
-//            Log.i(TAG, source.toString());
-//        } catch (URISyntaxException exception) {
-//            Log.d(TAG, "exception");
-//        }
-
-        //get text from textbox
-        EditText locationSearch = (EditText) findViewById(R.id.editText);
-        String location = locationSearch.getText().toString();
-
-        //list of points of interest
-//        List<Feature> features = source.querySourceFeatures(Expression.get("name");
+                        // Draw the route on the map
+                        if (navigationMapRoute != null) {
+                            navigationMapRoute.removeRoute();
+                        } else {
+                            navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
+                        }
+                        navigationMapRoute.addRoute(currentRoute);
+                    }
 
 
-        if (location != null || !location.equals("")) {
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                //match text from textbox to POI list
-                addressList = geocoder.getFromLocationName(location, 1);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Address address = addressList.get(0);
-            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-
-            //one marker at a time
-            if(destM != null){
-                mapboxMap.removeMarker(destM);
-            }
-            destM = mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
-
-
-            mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            Toast.makeText(getApplicationContext(), address.getLatitude() + " " + address.getLongitude(), Toast.LENGTH_LONG).show();
-            
-
-        }
+                    @Override
+                    public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+                        Log.e(TAG, "Error: " + throwable.getMessage());
+                    }
+                });
     }
 
 
