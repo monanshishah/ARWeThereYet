@@ -1,23 +1,42 @@
 package com.example.arwethereyet_se4450;
 
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PointF;
+import android.location.Location;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.location.Address;
-import android.location.Geocoder;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import com.google.gson.JsonElement;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+
+
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.BubbleLayout;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -27,15 +46,17 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+
 
 //specific imports for pin query
 import android.graphics.Bitmap;
@@ -56,12 +77,19 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.annotations.BubbleLayout;
 import com.mapbox.mapboxsdk.annotations.Marker;
 
+
 import static com.mapbox.mapboxsdk.style.layers.Property.ICON_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
+
+
+
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions;
 
 // classes to calculate a route
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
@@ -75,7 +103,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import com.mapbox.api.geocoding.v5.GeocodingCriteria;
-
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
@@ -101,6 +128,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //    private static final String MARKER_LAYER_ID = "MARKER_LAYER_ID";
     private static final String CALLOUT_LAYER_ID = "CALLOUT_LAYER_ID";
     private GeoJsonSource source;
+
+    //SEARCHING FUNCTIONALITY
+    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
+    private String symbolIconId = "symbolIconId";
 
 
     //pin query youtube
@@ -132,11 +163,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull final MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         mapboxMap.setStyle(new Style.Builder().fromUri("mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71"), new Style.OnStyleLoaded() {
+
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
                         // Map is set up and the style has loaded. Now you can add data or make other map adjustments
                         enableLocationComponent(style);
                         setUpData();
+                        initSearchFab();
+
                         mapboxMap.addOnMapClickListener(MainActivity.this);
                         Toast.makeText(MainActivity.this,
                                 getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
@@ -165,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
              mapboxMap.getStyle(style -> {
                  setupSource(style);
                  setUpInfoWindowLayer(style);
+                 setupLayer(style);
              });
          }
      }
@@ -220,6 +255,76 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            source.setGeoJson(featCollect);
 //        }
     }
+    private void initSearchFab() {
+        findViewById(R.id.fab_location_search).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new PlaceAutocomplete.IntentBuilder()
+                        .accessToken(Mapbox.getAccessToken() != null ? Mapbox.getAccessToken() : getString(R.string.access_token))
+                        .placeOptions(PlaceOptions.builder()
+                                .bbox(-81.28432464432893,42.99455346126038,-81.2664676815399,43.014377673454874)
+                                .backgroundColor(Color.parseColor("#EEEEEE"))
+                                .limit(10)
+                                .build(PlaceOptions.MODE_CARDS))
+                        .build(MainActivity.this);
+                startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+            }
+        });
+    }
+
+    //layer for search icon
+    private void setupLayer(@NonNull Style loadedMapStyle) {
+        loadedMapStyle.addLayer(new SymbolLayer("SYMBOL_LAYER_ID", GEOJSON_SOURCE_ID).withProperties(
+                iconImage(symbolIconId),
+                iconOffset(new Float[] {0f, -8f})
+        ));
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE) {
+
+// Retrieve selected location's CarmenFeature
+            CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+
+
+
+
+// Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above.
+// Then retrieve and update the source designated for showing a selected location's symbol layer icon
+
+            if (mapboxMap != null) {
+                Style style = mapboxMap.getStyle();
+                if (style != null) {
+                    if (source != null) {
+                        source.setGeoJson(FeatureCollection.fromFeatures(
+                                new Feature[] {Feature.fromJson(selectedCarmenFeature.toJson())}));
+                    }
+
+// Move map camera to the selected location
+                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(
+                            new CameraPosition.Builder()
+                                    .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                                            ((Point) selectedCarmenFeature.geometry()).longitude()))
+                                    .zoom(14)
+                                    .build()), 4000);
+
+
+                }
+                mapboxMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                                ((Point) selectedCarmenFeature.geometry()).longitude())));
+
+
+
+            }
+        }
+    }
+
+
+
 
     /**
      * Adds a SymbolLayer to the map to show the Feature properties info window.
@@ -553,47 +658,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Log.e(TAG, "Error: " + throwable.getMessage());
                     }
                 });
-    }
-
-
-    public void searchLocation(View view) {
-
-//        GeoJsonSource source = null;
-        List<Address> addressList = null;
-
-
-//        try {
-//            source = new GeoJsonSource("source", new URI("asset://CapstoneV1.geojson"));
-//            Log.i(TAG, source.toString());
-//        } catch (URISyntaxException exception) {
-//            Log.d(TAG, "exception");
-//        }
-
-        //get text from textbox
-        EditText locationSearch = (EditText) findViewById(R.id.editText);
-        String location = locationSearch.getText().toString();
-
-        //list of points of interest
-//        List<Feature> features = source.querySourceFeatures(Expression.get("name");
-
-
-        if (location != null || !location.equals("")) {
-            Geocoder geocoder = new Geocoder(this);
-            try {
-                //match text from textbox to POI list
-                addressList = geocoder.getFromLocationName(location, 1);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Address address = addressList.get(0);
-            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-            mapboxMap.addMarker(new MarkerOptions().position(latLng).title(location));
-            mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            Toast.makeText(getApplicationContext(), address.getLatitude() + " " + address.getLongitude(), Toast.LENGTH_LONG).show();
-            
-
-        }
     }
 
 
