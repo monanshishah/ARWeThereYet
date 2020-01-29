@@ -287,15 +287,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE) {
 
-// Retrieve selected location's CarmenFeature
+            // Retrieve selected location's CarmenFeature
             CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
 
+            if(destM != null)
+                mapboxMap.removeMarker(destM);
 
-
-
-// Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above.
-// Then retrieve and update the source designated for showing a selected location's symbol layer icon
-
+            // Create a new FeatureCollection and add a new Feature to it using selectedCarmenFeature above.
+            // Then retrieve and update the source designated for showing a selected location's symbol layer icon
             if (mapboxMap != null) {
                 Style style = mapboxMap.getStyle();
                 if (style != null) {
@@ -304,22 +303,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 new Feature[] {Feature.fromJson(selectedCarmenFeature.toJson())}));
                     }
 
-// Move map camera to the selected location
+                    // Move map camera to the selected location
                     mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(
                             new CameraPosition.Builder()
                                     .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
                                             ((Point) selectedCarmenFeature.geometry()).longitude()))
                                     .zoom(14)
                                     .build()), 4000);
-
-
                 }
-                mapboxMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+
+                destM = mapboxMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
                                 ((Point) selectedCarmenFeature.geometry()).longitude())));
 
+                LatLng searchPoint = new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                        ((Point) selectedCarmenFeature.geometry()).longitude());
 
+                Point destinationPoint = Point.fromLngLat(searchPoint.getLongitude(), searchPoint.getLatitude());
 
+                Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                        locationComponent.getLastKnownLocation().getLatitude());
+                getRoute(originPoint, destinationPoint);
+
+                button.setEnabled(true);
+                button.setBackgroundResource(R.color.mapboxBlue);
             }
         }
     }
