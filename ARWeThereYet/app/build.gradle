@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.ar.sceneform.plugin'
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.example.arwethereyet_se4450"
-        minSdkVersion 21
+        minSdkVersion 24 //had to change to 24 for scene form rendering
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -34,8 +35,24 @@ dependencies {
     // Mapbox dependencies
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.6.1'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.11.0'
+
+
+    //AR dependencies
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.14.0'
+    implementation 'com.google.ar:core:1.14.0'
+    implementation 'com.google.ar.sceneform:core:1.14.0'
+    // Obj - a simple Wavefront OBJ file loader
+    // https://github.com/javagl/Obj
+    implementation 'de.javagl:obj:0.2.1'
+
 //    implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.4'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.4'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-places-v8:0.9.0'
 
 }
+
+
+sceneform.asset('src/main/assets/arrow_model/arrow.obj',
+        'default',
+        'src/main/assets/arrow_model/arrow.sfa',
+        'src/main/res/raw/arrow')
