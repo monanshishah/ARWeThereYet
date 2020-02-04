@@ -97,10 +97,10 @@ public class ARPage extends AppCompatActivity implements SensorEventListener {
 //        arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdate);
 
 
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-
-        sensorManager.registerListener(this, sensor, sensorManager.SENSOR_DELAY_FASTEST);
+//        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+//        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+//
+//        sensorManager.registerListener(this, sensor, sensorManager.SENSOR_DELAY_FASTEST);
 //
 //        Timer timer = new Timer();
 //        //Set the schedule function
@@ -135,21 +135,21 @@ public class ARPage extends AppCompatActivity implements SensorEventListener {
 //                                  },
 //                0, 5000);
 
-//        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
-//            Anchor anchor = hitResult.createAnchor();
-//
-//            ModelRenderable.builder()
-//                    .setSource(this, R.raw.arrow)
-//                    .build()
-//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-//                    .exceptionally(throwable -> {
-//                        Toast toast =
-//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                        toast.setGravity(Gravity.CENTER, 0, 0);
-//                        toast.show();
-//                        return null;
-//                    });
-//        }));
+        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
+            Anchor anchor = hitResult.createAnchor();
+
+            ModelRenderable.builder()
+                    .setSource(this, R.raw.arrow)
+                    .build()
+                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
+                    .exceptionally(throwable -> {
+                        Toast toast =
+                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        return null;
+                    });
+        }));
     }
 
     private void onUpdate(FrameTime frameTime) {
