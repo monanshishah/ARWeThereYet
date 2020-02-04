@@ -49,6 +49,12 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.4'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-places-v8:0.9.0'
 
+/*    // Provides ArFragment, and other UX resources.
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.14.0'
+
+    // Alternatively, use ArSceneView without the UX dependency.
+    implementation 'com.google.ar.sceneform:core:1.14.0'*/
+
 }
 
 

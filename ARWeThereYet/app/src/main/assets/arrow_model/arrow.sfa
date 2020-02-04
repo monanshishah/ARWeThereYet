@@ -37,6 +37,7 @@
     file: 'src/main/assets/arrow_model/arrow.obj',
     name: 'arrow',
     recenter: 'root',
+    scale: 0.200000,
   },
   version: '0.54:2',
 }

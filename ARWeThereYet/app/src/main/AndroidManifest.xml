@@ -3,6 +3,7 @@
     package="com.example.arwethereyet_se4450">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <!-- "AR Optional" apps must declare minSdkVersion ≥ 14
      >=24 for "AR Required"-->
@@ -35,9 +36,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"/>
-
         <meta-data android:name="com.google.ar.core" android:value="optional" />
-
     </application>
 
 </manifest>
