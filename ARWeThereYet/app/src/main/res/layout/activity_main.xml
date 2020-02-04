@@ -13,6 +13,7 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="43.0095971"
         mapbox:mapbox_cameraTargetLng="-81.2737336"
+        mapbox:mapbox_cameraZoom="14">
 
         <Button
             android:id="@+id/startButton"
@@ -22,7 +23,8 @@
             android:enabled="false"
             android:text="Start navigation"
             android:background="@color/mapboxGrayLight"
-            android:textColor="@color/mapboxWhite"/>
+            android:textColor="@color/mapboxWhite"
+            tools:ignore="MissingConstraints" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_location_search"
@@ -34,7 +36,7 @@
             app:backgroundTint="@color/colorPrimary"
             app:srcCompat="@android:drawable/ic_search_category_default"
             tools:ignore="MissingConstraints" />
-    </com.mapbox.mapboxsdk.maps.MapView>
+
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -55,6 +57,7 @@
             android:visibility="visible"
             tools:visibility="visible" />
     </LinearLayout>
+    </com.mapbox.mapboxsdk.maps.MapView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
