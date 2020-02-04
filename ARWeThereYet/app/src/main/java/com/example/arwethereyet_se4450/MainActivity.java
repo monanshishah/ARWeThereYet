@@ -129,9 +129,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationEngine locationEngine;
     private static final long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
-    // Variables needed to listen to location updates
-//    private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
-
 
     //specific var for pin query
     private static final String GEOJSON_SOURCE_ID = "GEOJSON_SOURCE_ID";//"ck58iqryj01px2nk0t6mca66g";
@@ -187,10 +184,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void arClick(View view){
+
         Intent myIntent = new Intent(MainActivity.this, ARPage.class);
         startActivity(myIntent);
         finish();
-
     }
 
     @Override
@@ -248,12 +245,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //loadedStyle.addSource(source);
 
         try {
-
             source = new GeoJsonSource(GEOJSON_SOURCE_ID, new URI("asset://CapstoneV1.geojson"));
 
             loadedStyle.addSource(source);
             Log.i(TAG,source.toString());
-
 
         } catch (URISyntaxException exception) {
 
@@ -684,7 +679,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
 
                         currentRoute = response.body().routes().get(0);
-
 
                         // Draw the route on the map
                         if (navigationMapRoute != null) {
