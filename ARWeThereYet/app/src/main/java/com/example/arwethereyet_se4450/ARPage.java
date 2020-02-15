@@ -1,15 +1,20 @@
 package com.example.arwethereyet_se4450;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,8 +41,10 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 
 //sceneform
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.Camera;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
+import com.google.ar.sceneform.collision.Ray;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
@@ -56,7 +63,9 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class ARPage extends AppCompatActivity implements SensorEventListener {
+import org.jetbrains.annotations.NotNull;
+
+public class ARPage extends AppCompatActivity implements SensorEventListener, LocationListener {
 
     private static Button myArButton;
     private Session mySession;
@@ -81,11 +90,40 @@ public class ARPage extends AppCompatActivity implements SensorEventListener {
     private TriggerEventListener triggerEventListener;
     private boolean isModelPlaced = false;
 
+    //accelerometer
+    private float xAxis = 0f;
+    private float yAxis = 0f;
+    private float zAxis = 0f;
+    private float speed = 0f;
+
+    //anchor
+    private Anchor anchor;
+    private boolean timerEnd= false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.ar_page);
+
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    Activity#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, this);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(this, "GPS is Enabled in your device", Toast.LENGTH_SHORT).show();
+        }
+//else{
+//            showGPSDisabledAlertToUser();
+//        }
 
 //        //sceneform version
 //        if (!checkIsSupportedDeviceOrFinish(this)) {
@@ -95,111 +133,199 @@ public class ARPage extends AppCompatActivity implements SensorEventListener {
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
 //        arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdate);
-
-
+//
 //        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+//        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 //
 //        sensorManager.registerListener(this, sensor, sensorManager.SENSOR_DELAY_FASTEST);
 //
-//        Timer timer = new Timer();
-//        //Set the schedule function
-//        timer.scheduleAtFixedRate(new TimerTask() {
-//                                      @Override
-//                                      public void run() {
-//
-//                                          Frame frame = arFragment.getArSceneView().getArFrame();
-//
-//                                          Collection<Plane> planes = frame.getUpdatedTrackables(Plane.class);
-//
-//                                          for(Plane plane : planes){
-//                                              if(plane.getTrackingState() == TrackingState.TRACKING){
-//
-//                                                  Anchor anchor = plane.createAnchor(plane.getCenterPose());
-//
-//                                                  ModelRenderable.builder()
-//                                                          .setSource(ARPage.this, R.raw.arrow)
-//                                                          .build()
-//                                                          .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-//                                                          .exceptionally(throwable -> {
-//                                                              Toast toast =
-//                                                                      Toast.makeText(ARPage.this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                                                              toast.setGravity(Gravity.CENTER, 0, 0);
-//                                                              toast.show();
-//                                                              return null;
-//                                                          });
-//                                                  break;
-//                                              }
-//                                          }
-//                                      }
-//                                  },
-//                0, 5000);
 
-        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
-            Anchor anchor = hitResult.createAnchor();
+//        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
+//            Anchor anchor = hitResult.createAnchor();
+//
+//            ModelRenderable.builder()
+//                    .setSource(this, R.raw.arrow)
+//                    .build()
+//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
+//                    .exceptionally(throwable -> {
+//                        Toast toast =
+//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+//                        toast.setGravity(Gravity.CENTER, 0, 0);
+//                        toast.show();
+//                        return null;
+//                    });
+//        }));
 
-            ModelRenderable.builder()
-                    .setSource(this, R.raw.arrow)
-                    .build()
-                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-                    .exceptionally(throwable -> {
-                        Toast toast =
-                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.CENTER, 0, 0);
-                        toast.show();
-                        return null;
-                    });
-        }));
+        ModelRenderable.builder()
+                .setSource(ARPage.this, R.raw.arrow)
+                .build()
+                .thenAccept(modelRenderable -> addModelToScene(modelRenderable))
+                .exceptionally(throwable -> {
+                    Toast toast =
+                            Toast.makeText(ARPage.this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                    return null;
+                });
     }
 
-    private void onUpdate(FrameTime frameTime) {
+
+
+//    private void renderModel() {
+//        ModelRenderable.builder()
+//                .setSource(ARPage.this, R.raw.arrow)
+//                .build()
+//                .thenAccept(modelRenderable -> addModelToScene(modelRenderable))
+//                .exceptionally(throwable -> {
+//                    Toast toast =
+//                            Toast.makeText(ARPage.this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+//                    toast.setGravity(Gravity.CENTER, 0, 0);
+//                    toast.show();
+//                    return null;
+//                });
+//    }
+
+        private void onUpdate (FrameTime frameTime){
 //
-//        if(isModelPlaced)
-//            return;
+////        if(isModelPlaced)
+////            return;
+//
+//            if(timerEnd == true){
+//                renderModel();
+//                timerEnd = false;
+//            }
+//
+//            Frame frame = arFragment.getArSceneView().getArFrame();
+//
+//            Collection<Plane> planes = frame.getUpdatedTrackables(Plane.class);
+//
+//            for(Plane plane : planes){
+//                Plane lastelement;
+//                lastelement = plane;
+//                if (lastelement.getTrackingState() == TrackingState.TRACKING) {
+//                    anchor = lastelement.createAnchor(lastelement.getCenterPose());
+//                    Log.d(TAG, "this is the plane:" + lastelement);
+//                }
+//            }
 
-        Frame frame = arFragment.getArSceneView().getArFrame();
 
-        Collection<Plane> planes = frame.getUpdatedTrackables(Plane.class);
-
-        for(Plane plane : planes){
-            if(plane.getTrackingState() == TrackingState.TRACKING){
-
-                Anchor anchor = plane.createAnchor(plane.getCenterPose());
-
-                ModelRenderable.builder()
-                    .setSource(this, R.raw.arrow)
-                    .build()
-                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-                    .exceptionally(throwable -> {
-                        Toast toast =
-                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.CENTER, 0, 0);
-                        toast.show();
-                        return null;
-                    });
-                break;
-            }
         }
+//
+//                ModelRenderable.builder()
+//                    .setSource(this, R.raw.arrow)
+//                    .build()
+//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
+//                    .exceptionally(throwable -> {
+//                        Toast toast =
+//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+//                        toast.setGravity(Gravity.CENTER, 0, 0);
+//                        toast.show();
+//                        return null;
+//                    });
+//                break;
+
+//    }
+
+
+
+
+
+    //onResume() register the accelerometer for listening the events
+    protected void onResume() {
+        super.onResume();
+//        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    private void addModelToScene(Anchor anchor, ModelRenderable modelRenderable) {
-        isModelPlaced = true;
-        AnchorNode anchorNode = new AnchorNode(anchor);
-        TransformableNode transformableNode = new TransformableNode(arFragment.getTransformationSystem());
-        transformableNode.setParent(anchorNode);
-        transformableNode.setRenderable(modelRenderable);
-        transformableNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
-        arFragment.getArSceneView().getScene().addChild(anchorNode);
-        transformableNode.select();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Timer timer = new Timer();
+        //Set the schedule function
+        timer.scheduleAtFixedRate(new TimerTask() {
+                                      @Override
+                                      public void run() {
+                                          timerEnd = true;
+                                      }
+                                  },
+                0, 5000);
+    }
+
+    //onPause() unregister the accelerometer for stop listening the events
+    protected void onPause() {
+        super.onPause();
+//        sensorManager.unregisterListener(this);
+    }
+
+    private void addModelToScene(ModelRenderable modelRenderable) {
+//        isModelPlaced = true;
+//        AnchorNode anchorNode = new AnchorNode(anchor);
+//        TransformableNode transformableNode = new TransformableNode(arFragment.getTransformationSystem());
+//        transformableNode.setParent(anchorNode);
+//        transformableNode.setRenderable(modelRenderable);
+//        transformableNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
+//        arFragment.getArSceneView().getScene().addChild(anchorNode);
+//        transformableNode.select();
+
+        Node node = new Node();
+        node.setParent(arFragment.getArSceneView().getScene());
+        node.setRenderable(modelRenderable);
+        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
+        arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
+            Camera camera = arFragment.getArSceneView().getScene().getCamera();
+            Ray ray = camera.screenPointToRay(1080/2f, 1920/2f);
+            Vector3 newPosition = ray.getPoint(1f);
+            node.setLocalPosition(newPosition);
+        });
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        System.out.print("Hello world");
+//        Toast toast =
+////                Toast.makeText(this, "Sensor works", Toast.LENGTH_LONG);
+////        toast.setGravity(Gravity.CENTER, 0, 0);
+////        toast.show();
+        System.out.print("hello world");
+        setValuesToZero();
+
+        xAxis = event.values[0];
+
+//        if (xAxis > 1.0) {
+//            Log.d(TAG, "accelerometer detected");
+//
+//        }
+    }
+
+    private void setValuesToZero() {
+        xAxis = 0f;
+        yAxis = 0f;
+        zAxis = 0f;
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    public void onLocationChanged(@NotNull Location location) {
+        speed =location.getSpeed();
+
+
+        Log.d(TAG, "*********************speed=" + speed);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
 
     }
 
