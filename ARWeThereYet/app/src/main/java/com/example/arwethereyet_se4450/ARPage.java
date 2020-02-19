@@ -22,22 +22,14 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
-import com.google.ar.core.ArCoreApk;
-import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Pose;
+import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
-import com.google.ar.core.exceptions.UnavailableApkTooOldException;
-import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
-import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
-import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
-import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+
 
 //sceneform
 import com.google.ar.sceneform.AnchorNode;
@@ -50,8 +42,7 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
-//import com.example.arwethereyet_se4450.CameraPermissionHelper;
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
@@ -67,22 +58,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class ARPage extends AppCompatActivity implements SensorEventListener, LocationListener {
 
-    private static Button myArButton;
-    private Session mySession;
 
     //from hello sample
     private static final String TAG = ARPage.class.getSimpleName();
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private ArFragment arFragment;
-    private ModelRenderable andyRenderable;
 
-    //from line sample
-    private AnchorNode anchorNode;
-    private List<AnchorNode> anchorNodeList = new ArrayList<>();
-    private Integer numberOfAnchors = 0;
-    private AnchorNode currentSelectedAnchorNode = null;
-    private Node nodeForLine;
 
     //detects movement
     private SensorManager sensorManager;
@@ -125,6 +107,12 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //            showGPSDisabledAlertToUser();
 //        }
 
+        /**
+         * If the below hard code sceneform compatibility check is not used
+         * then AndroidManifest.xml must ensure open gl.
+         * The benefit to the hard coded check is that, for devices that aren't compatible
+         * they can still use rest of app features just not AR.
+         */
 //        //sceneform version
 //        if (!checkIsSupportedDeviceOrFinish(this)) {
 //            return;
@@ -140,21 +128,6 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        sensorManager.registerListener(this, sensor, sensorManager.SENSOR_DELAY_FASTEST);
 //
 
-//        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
-//            Anchor anchor = hitResult.createAnchor();
-//
-//            ModelRenderable.builder()
-//                    .setSource(this, R.raw.arrow)
-//                    .build()
-//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-//                    .exceptionally(throwable -> {
-//                        Toast toast =
-//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                        toast.setGravity(Gravity.CENTER, 0, 0);
-//                        toast.show();
-//                        return null;
-//                    });
-//        }));
 
         ModelRenderable.builder()
                 .setSource(ARPage.this, R.raw.arrow)
@@ -211,19 +184,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
         }
 //
-//                ModelRenderable.builder()
-//                    .setSource(this, R.raw.arrow)
-//                    .build()
-//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-//                    .exceptionally(throwable -> {
-//                        Toast toast =
-//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                        toast.setGravity(Gravity.CENTER, 0, 0);
-//                        toast.show();
-//                        return null;
-//                    });
-//                break;
-
+//    renderModel();
 //    }
 
 
@@ -329,93 +290,26 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     }
 
-//    public void b2(View view){
-//        Frame frame = arFragment.getArSceneView().getArFrame();
-//        int currentAnchorIndex = numberOfAnchors;
-//        Session session = arFragment.getArSceneView().getSession();
-//        Log.i(TAG, "here");
-//        Anchor newMarkAnchor = session.createAnchor(
-//                frame.getCamera().getPose()
-//                        .compose(Pose.makeTranslation(1f, 0, -5f))
-//                        .extractTranslation());
-//        AnchorNode addedAnchorNode = new AnchorNode(newMarkAnchor);
-//        addedAnchorNode.setRenderable(andyRenderable);
-//        addAnchorNode(addedAnchorNode);
-//        currentSelectedAnchorNode = addedAnchorNode;
-//    }
-
-//    private void addAnchorNode(AnchorNode nodeToAdd) {
-//        //Add an anchor node
-//        nodeToAdd.setParent(arFragment.getArSceneView().getScene());
-//        anchorNodeList.add(nodeToAdd);
-//        numberOfAnchors++;
-//    }
-
-//    public void goBackClick(View view){
-//        Intent myIntent = new Intent(ARPage.this, MainActivity.class);
-//        startActivity(myIntent);
-//        finish();
-//    }
 
 
-    // Set to true ensures requestInstall() triggers installation if necessary.
-//    private boolean mUserRequestedInstall = true;
-//
-//    protected void onResume() {
-//        super.onResume();
-//
-//        // ARCore requires camera permission to operate.
-//        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-//            CameraPermissionHelper.requestCameraPermission(this);
-//            return;
-//        }
-//
-//        // Make sure Google Play Services for AR is installed and up to date.
-//        try {
-//            if (mySession == null) {
-//                switch (ArCoreApk.getInstance().requestInstall(this, mUserRequestedInstall)) {
-//                    case INSTALLED:
-//                        // Success, create the AR session.
-//                        mySession = new Session(this);
-//                        break;
-//                    case INSTALL_REQUESTED:
-//                        // Ensures next invocation of requestInstall() will either return
-//                        // INSTALLED or throw an exception.
-//                        mUserRequestedInstall = false;
-//                        return;
-//                }
-//            }
-//        } catch (UnavailableUserDeclinedInstallationException e) {
-//            // Display an appropriate message to the user and return gracefully.
-//            Toast.makeText(this, "TODO: handle exception " + e, Toast.LENGTH_LONG)
-//                    .show();
-//            return;
-//        } catch (UnavailableArcoreNotInstalledException e) {
-//            return;
-//        } catch (UnavailableDeviceNotCompatibleException e) {
-//            return;
-//        } catch (UnavailableSdkTooOldException e) {
-//            return;
-//        } catch (UnavailableApkTooOldException e) {
-//            return; //e.printStackTrace();
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
-//        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-//            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-//                    .show();
-//            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-//                // Permission denied with checking "Do not ask again".
-//                CameraPermissionHelper.launchPermissionSettings(this);
-//            }
-//            finish();
-//        }
-//    }
+    public void goBackClick(View view){
+        Intent myIntent = new Intent(ARPage.this, MainActivity.class);
+        startActivity(myIntent);
+        finish();
+    }
 
 
-    //sceneform version
+    //AR line sample for reference
+    //https://github.com/mickod/LineView/blob/master/lineview_main_app_module/src/main/java/com/amodtech/ar/lineview/LineViewMainActivity.java
+
+
+/**
+ * Alternative permission and device compatibility check without use of sceneform
+ * refer to: https://developers.google.com/ar/develop/java/enable-arcore
+ */
+
+
+    //sceneform hard coded compatibility check version
 
 //    /**
 //     * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
