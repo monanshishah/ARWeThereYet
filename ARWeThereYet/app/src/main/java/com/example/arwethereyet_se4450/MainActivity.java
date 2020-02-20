@@ -90,6 +90,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
 
 //AR
@@ -149,16 +150,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker destM;
 
     // variables for calculating and drawing a route
-    private DirectionsRoute currentRoute;
+    //changed private to public for current route
+    public static DirectionsRoute currentRoute;
     private static final String TAG = "DirectionsActivity";
     private NavigationMapRoute navigationMapRoute;
 
     // variables needed to initialize navigation
     private Button button;
+    private Button arButton;
 
-
-    //ar var
-    Button arB;
 
 
     @Override
@@ -170,22 +170,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        //AR
-//        arB = (Button) findViewById(R.id.button_ar_nav);
-//        arB.setOnClickListener(new OnClickListener() {
-//            public void onClick(View arg0) {
-//
-//                // Start NewActivity.class
-//                Intent myIntent = new Intent(MainActivity.this, ARPage.class);
-//                startActivity(myIntent);
-//                finish();
-//            }
-//        });
     }
 
     public void arClick(View view){
 
         Intent myIntent = new Intent(MainActivity.this, ARPage.class);
+        //myIntent.putExtra("route", currentRoute); couldn't pass non customised object this way
         startActivity(myIntent);
         finish();
     }
@@ -214,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Call this method with Context from within an Activity
                             NavigationLauncher.startNavigation(MainActivity.this, options);
                         });
+
+                        arButton = findViewById(R.id.button_ar_nav);
                     }
         });
     }
@@ -248,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             source = new GeoJsonSource(GEOJSON_SOURCE_ID, new URI("asset://CapstoneV1.geojson"));
 
             loadedStyle.addSource(source);
-            Log.i(TAG,source.toString());
+           // Log.i(TAG,source.toString());
 
         } catch (URISyntaxException exception) {
 
@@ -279,11 +271,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (source != null) {
             source.setGeoJson(featureAtClickPoint);
         }
-        //below shows multiple identical markers
-//        if (source != null && featCollect != null){
-//            source.setGeoJson(featCollect);
-//        }
     }
+
     private void initSearchFab() {
         findViewById(R.id.fab_location_search).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -355,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 button.setEnabled(true);
                 button.setBackgroundResource(R.color.mapboxBlue);
+                arButton.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -420,11 +410,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapboxMap.removeMarker(destM);
         }
         destM = mapboxMap.addMarker(new MarkerOptions().position(point));
-//        Point dest = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-//        origin = Point.fromLngLat(ogLoc.getLongitude(), ogLoc.getLatitude());
         //supposedly black icon/marker is an emulator issue, alt has to deal with deprecation of Marker
-
-        //return true;
 
         Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
         Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
@@ -433,6 +419,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         button.setEnabled(true);
         button.setBackgroundResource(R.color.mapboxBlue);
+        arButton.setVisibility(View.VISIBLE);
 
         return handleClickIcon(mapboxMap.getProjection().toScreenLocation(point));
     }

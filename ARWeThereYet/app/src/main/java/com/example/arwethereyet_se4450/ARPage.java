@@ -42,6 +42,17 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+
 
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +67,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ARPage extends AppCompatActivity implements SensorEventListener, LocationListener {
+public class ARPage extends AppCompatActivity implements SensorEventListener, LocationListener,
+        OnNavigationReadyCallback, NavigationListener, MilestoneEventListener {
 
 
     //from hello sample
@@ -81,6 +93,10 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     //anchor
     private Anchor anchor;
     private boolean timerEnd= false;
+
+    //AR route
+    private DirectionsRoute currentRoute;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +156,32 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                     toast.show();
                     return null;
                 });
+
+
+        navigationView = findViewById(R.id.navigationView);
+        navigationView.onCreate(savedInstanceState);
+        navigationView.initialize(this);
+
+    }
+
+    private void navViewSetup(){
+        //get route from prev activity
+        currentRoute = MainActivity.currentRoute;
+        NavigationViewOptions options = NavigationViewOptions.builder()
+                .directionsRoute(currentRoute)
+                .shouldSimulateRoute(true)
+                .navigationListener(this)
+                //.routeListener(this)
+                //.feedbackListener(this)
+                //.progressChangeListener(this)
+                .milestoneEventListener(this)
+                .build();
+
+        Log.i(TAG,options.toString());
+        Log.i(TAG,navigationView.toString());
+
+        navigationView.startNavigation(options);
+
     }
 
 
@@ -200,6 +242,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     protected void onStart() {
         super.onStart();
+        navigationView.onStart();
         Timer timer = new Timer();
         //Set the schedule function
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -296,6 +339,35 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         Intent myIntent = new Intent(ARPage.this, MainActivity.class);
         startActivity(myIntent);
         finish();
+    }
+
+
+    //methods to implement for listeners
+    @Override
+    public void onCancelNavigation() {
+
+    }
+
+    @Override
+    public void onNavigationFinished() {
+        navigationView.stopNavigation();
+    }
+
+    @Override
+    public void onNavigationRunning() {
+
+    }
+
+    @Override
+    public void onNavigationReady(boolean isRunning) {
+        navViewSetup();
+    }
+
+    @Override
+    public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+        Log.i(TAG,instruction);
+        //route progress info did not appear useful with emulator + simulator combo
+        //Log.i(TAG, routeProgress.toString());
     }
 
 
