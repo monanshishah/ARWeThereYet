@@ -336,6 +336,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
 
     public void goBackClick(View view){
+        navigationView.stopNavigation();
         Intent myIntent = new Intent(ARPage.this, MainActivity.class);
         startActivity(myIntent);
         finish();
@@ -346,10 +347,12 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     public void onCancelNavigation() {
 
+        navigationView.stopNavigation();
     }
 
     @Override
     public void onNavigationFinished() {
+
         navigationView.stopNavigation();
     }
 
@@ -365,9 +368,66 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     @Override
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+        Boolean angle = false;
+
         Log.i(TAG,instruction);
         //route progress info did not appear useful with emulator + simulator combo
         //Log.i(TAG, routeProgress.toString());
+
+        //if the instruction contains distance then its not a sharp turn
+        //will have to adjust for feet or metres (change localisation settings in mapbox)
+        if(instruction.contains("0") || instruction.contains ("feet") || instruction.contains("metres")){
+            Log.i(TAG, "distance");
+            //will have to angle arrow in corresponding direction
+            angle = true;
+            return;
+        }
+        if(instruction.contains("Continue on")){
+            //no change do nothing
+            return;
+        }
+
+        //roundabout has 1st exit (right angle), has 2nd exit (straight), 3rd exit (left angle)
+        if(instruction.contains("roundabout")){
+            Log.i(TAG, "roundabout");
+            if(instruction.contains("Exit the roundabout")){
+                Log.i(TAG,"roundabout exit make sharp right");
+            }
+            else if (instruction.contains("1st")){
+                Log.i(TAG, "round 1");
+                angle = true;
+            }
+            else if (instruction.contains("2nd")){
+                Log.i(TAG,"round 2");
+            }
+            else if (instruction.contains("3rd")){
+                Log.i(TAG, "round 3");
+                angle = true;
+            }
+        }
+        //e.g. of output: Turn right, then turn left
+        else if (instruction.contains("then turn")){
+            if (instruction.indexOf("left")< instruction.indexOf("right")){
+                //turning left before right
+                Log.i(TAG, "turn left first");
+            }
+            else{
+                Log.i(TAG,"turn right first");
+            }
+        }
+        else if(instruction.contains("left")){
+            Log.i(TAG,"left");
+        }
+        else if (instruction.contains("right")){
+            Log.i(TAG,"right");
+        }
+
+        //e.g. output to use: In 500 feet, you will arrive at your destination
+        //e.g. output: You have arrived at your destination, on the left
+        //could change colour of arrow to reflect near/at destination
+
+
+
     }
 
 
