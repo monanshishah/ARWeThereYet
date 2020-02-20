@@ -13,6 +13,9 @@
 <!--    only for required:-->
 <!--    <uses-feature android:name="android.hardware.camera.ar" />-->
 
+    <!-- Sceneform requires OpenGL ES 3.0 or later. -->
+    <uses-feature android:glEsVersion="0x00030000" android:required="true" />
+
 
     <application
         android:allowBackup="true"

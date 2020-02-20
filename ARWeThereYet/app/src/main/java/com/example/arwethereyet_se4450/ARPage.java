@@ -22,22 +22,14 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
-import com.google.ar.core.ArCoreApk;
-import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Pose;
+import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
-import com.google.ar.core.exceptions.UnavailableApkTooOldException;
-import com.google.ar.core.exceptions.UnavailableArcoreNotInstalledException;
-import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
-import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
-import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
+
 
 //sceneform
 import com.google.ar.sceneform.AnchorNode;
@@ -50,8 +42,18 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
-//import com.example.arwethereyet_se4450.CameraPermissionHelper;
-import java.util.ArrayList;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
@@ -65,24 +67,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ARPage extends AppCompatActivity implements SensorEventListener, LocationListener {
+public class ARPage extends AppCompatActivity implements SensorEventListener, LocationListener,
+        OnNavigationReadyCallback, NavigationListener, MilestoneEventListener {
 
-    private static Button myArButton;
-    private Session mySession;
 
     //from hello sample
     private static final String TAG = ARPage.class.getSimpleName();
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private ArFragment arFragment;
-    private ModelRenderable andyRenderable;
 
-    //from line sample
-    private AnchorNode anchorNode;
-    private List<AnchorNode> anchorNodeList = new ArrayList<>();
-    private Integer numberOfAnchors = 0;
-    private AnchorNode currentSelectedAnchorNode = null;
-    private Node nodeForLine;
 
     //detects movement
     private SensorManager sensorManager;
@@ -99,6 +93,10 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     //anchor
     private Anchor anchor;
     private boolean timerEnd= false;
+
+    //AR route
+    private DirectionsRoute currentRoute;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +123,12 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //            showGPSDisabledAlertToUser();
 //        }
 
+        /**
+         * If the below hard code sceneform compatibility check is not used
+         * then AndroidManifest.xml must ensure open gl.
+         * The benefit to the hard coded check is that, for devices that aren't compatible
+         * they can still use rest of app features just not AR.
+         */
 //        //sceneform version
 //        if (!checkIsSupportedDeviceOrFinish(this)) {
 //            return;
@@ -140,21 +144,6 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        sensorManager.registerListener(this, sensor, sensorManager.SENSOR_DELAY_FASTEST);
 //
 
-//        arFragment.setOnTapArPlaneListener(((hitResult, plane, motionEvent) -> {
-//            Anchor anchor = hitResult.createAnchor();
-//
-//            ModelRenderable.builder()
-//                    .setSource(this, R.raw.arrow)
-//                    .build()
-//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-//                    .exceptionally(throwable -> {
-//                        Toast toast =
-//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                        toast.setGravity(Gravity.CENTER, 0, 0);
-//                        toast.show();
-//                        return null;
-//                    });
-//        }));
 
         ModelRenderable.builder()
                 .setSource(ARPage.this, R.raw.arrow)
@@ -167,6 +156,32 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                     toast.show();
                     return null;
                 });
+
+
+        navigationView = findViewById(R.id.navigationView);
+        navigationView.onCreate(savedInstanceState);
+        navigationView.initialize(this);
+
+    }
+
+    private void navViewSetup(){
+        //get route from prev activity
+        currentRoute = MainActivity.currentRoute;
+        NavigationViewOptions options = NavigationViewOptions.builder()
+                .directionsRoute(currentRoute)
+                .shouldSimulateRoute(true)
+                .navigationListener(this)
+                //.routeListener(this)
+                //.feedbackListener(this)
+                //.progressChangeListener(this)
+                .milestoneEventListener(this)
+                .build();
+
+        Log.i(TAG,options.toString());
+        Log.i(TAG,navigationView.toString());
+
+        navigationView.startNavigation(options);
+
     }
 
 
@@ -211,19 +226,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
         }
 //
-//                ModelRenderable.builder()
-//                    .setSource(this, R.raw.arrow)
-//                    .build()
-//                    .thenAccept(modelRenderable -> addModelToScene(anchor, modelRenderable))
-//                    .exceptionally(throwable -> {
-//                        Toast toast =
-//                                Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                        toast.setGravity(Gravity.CENTER, 0, 0);
-//                        toast.show();
-//                        return null;
-//                    });
-//                break;
-
+//    renderModel();
 //    }
 
 
@@ -239,6 +242,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     protected void onStart() {
         super.onStart();
+        navigationView.onStart();
         Timer timer = new Timer();
         //Set the schedule function
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -329,93 +333,115 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     }
 
-//    public void b2(View view){
-//        Frame frame = arFragment.getArSceneView().getArFrame();
-//        int currentAnchorIndex = numberOfAnchors;
-//        Session session = arFragment.getArSceneView().getSession();
-//        Log.i(TAG, "here");
-//        Anchor newMarkAnchor = session.createAnchor(
-//                frame.getCamera().getPose()
-//                        .compose(Pose.makeTranslation(1f, 0, -5f))
-//                        .extractTranslation());
-//        AnchorNode addedAnchorNode = new AnchorNode(newMarkAnchor);
-//        addedAnchorNode.setRenderable(andyRenderable);
-//        addAnchorNode(addedAnchorNode);
-//        currentSelectedAnchorNode = addedAnchorNode;
-//    }
-
-//    private void addAnchorNode(AnchorNode nodeToAdd) {
-//        //Add an anchor node
-//        nodeToAdd.setParent(arFragment.getArSceneView().getScene());
-//        anchorNodeList.add(nodeToAdd);
-//        numberOfAnchors++;
-//    }
-
-//    public void goBackClick(View view){
-//        Intent myIntent = new Intent(ARPage.this, MainActivity.class);
-//        startActivity(myIntent);
-//        finish();
-//    }
 
 
-    // Set to true ensures requestInstall() triggers installation if necessary.
-//    private boolean mUserRequestedInstall = true;
-//
-//    protected void onResume() {
-//        super.onResume();
-//
-//        // ARCore requires camera permission to operate.
-//        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-//            CameraPermissionHelper.requestCameraPermission(this);
-//            return;
-//        }
-//
-//        // Make sure Google Play Services for AR is installed and up to date.
-//        try {
-//            if (mySession == null) {
-//                switch (ArCoreApk.getInstance().requestInstall(this, mUserRequestedInstall)) {
-//                    case INSTALLED:
-//                        // Success, create the AR session.
-//                        mySession = new Session(this);
-//                        break;
-//                    case INSTALL_REQUESTED:
-//                        // Ensures next invocation of requestInstall() will either return
-//                        // INSTALLED or throw an exception.
-//                        mUserRequestedInstall = false;
-//                        return;
-//                }
-//            }
-//        } catch (UnavailableUserDeclinedInstallationException e) {
-//            // Display an appropriate message to the user and return gracefully.
-//            Toast.makeText(this, "TODO: handle exception " + e, Toast.LENGTH_LONG)
-//                    .show();
-//            return;
-//        } catch (UnavailableArcoreNotInstalledException e) {
-//            return;
-//        } catch (UnavailableDeviceNotCompatibleException e) {
-//            return;
-//        } catch (UnavailableSdkTooOldException e) {
-//            return;
-//        } catch (UnavailableApkTooOldException e) {
-//            return; //e.printStackTrace();
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
-//        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-//            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-//                    .show();
-//            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-//                // Permission denied with checking "Do not ask again".
-//                CameraPermissionHelper.launchPermissionSettings(this);
-//            }
-//            finish();
-//        }
-//    }
+    public void goBackClick(View view){
+        navigationView.stopNavigation();
+        Intent myIntent = new Intent(ARPage.this, MainActivity.class);
+        startActivity(myIntent);
+        finish();
+    }
 
 
-    //sceneform version
+    //methods to implement for listeners
+    @Override
+    public void onCancelNavigation() {
+
+        navigationView.stopNavigation();
+    }
+
+    @Override
+    public void onNavigationFinished() {
+
+        navigationView.stopNavigation();
+    }
+
+    @Override
+    public void onNavigationRunning() {
+
+    }
+
+    @Override
+    public void onNavigationReady(boolean isRunning) {
+        navViewSetup();
+    }
+
+    @Override
+    public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+        Boolean angle = false;
+
+        Log.i(TAG,instruction);
+        //route progress info did not appear useful with emulator + simulator combo
+        //Log.i(TAG, routeProgress.toString());
+
+        //if the instruction contains distance then its not a sharp turn
+        //will have to adjust for feet or metres (change localisation settings in mapbox)
+        if(instruction.contains("0") || instruction.contains ("feet") || instruction.contains("metres")){
+            Log.i(TAG, "distance");
+            //will have to angle arrow in corresponding direction
+            angle = true;
+            return;
+        }
+        if(instruction.contains("Continue on")){
+            //no change do nothing
+            return;
+        }
+
+        //roundabout has 1st exit (right angle), has 2nd exit (straight), 3rd exit (left angle)
+        if(instruction.contains("roundabout")){
+            Log.i(TAG, "roundabout");
+            if(instruction.contains("Exit the roundabout")){
+                Log.i(TAG,"roundabout exit make sharp right");
+            }
+            else if (instruction.contains("1st")){
+                Log.i(TAG, "round 1");
+                angle = true;
+            }
+            else if (instruction.contains("2nd")){
+                Log.i(TAG,"round 2");
+            }
+            else if (instruction.contains("3rd")){
+                Log.i(TAG, "round 3");
+                angle = true;
+            }
+        }
+        //e.g. of output: Turn right, then turn left
+        else if (instruction.contains("then turn")){
+            if (instruction.indexOf("left")< instruction.indexOf("right")){
+                //turning left before right
+                Log.i(TAG, "turn left first");
+            }
+            else{
+                Log.i(TAG,"turn right first");
+            }
+        }
+        else if(instruction.contains("left")){
+            Log.i(TAG,"left");
+        }
+        else if (instruction.contains("right")){
+            Log.i(TAG,"right");
+        }
+
+        //e.g. output to use: In 500 feet, you will arrive at your destination
+        //e.g. output: You have arrived at your destination, on the left
+        //could change colour of arrow to reflect near/at destination
+
+
+
+    }
+
+
+    //AR line sample for reference
+    //https://github.com/mickod/LineView/blob/master/lineview_main_app_module/src/main/java/com/amodtech/ar/lineview/LineViewMainActivity.java
+
+
+/**
+ * Alternative permission and device compatibility check without use of sceneform
+ * refer to: https://developers.google.com/ar/develop/java/enable-arcore
+ */
+
+
+    //sceneform hard coded compatibility check version
 
 //    /**
 //     * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run

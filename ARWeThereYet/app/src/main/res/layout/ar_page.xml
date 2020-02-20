@@ -12,14 +12,17 @@
 <!--        android:text="something" />-->
 
 <!--</RelativeLayout>-->
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     tools:context=".ARPage">
 
-    <fragment android:name="com.google.ar.sceneform.ux.ArFragment"
+    <fragment
         android:id="@+id/ux_fragment"
+        android:name="com.google.ar.sceneform.ux.ArFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -41,7 +44,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="b2"
-        android:text="Show" />
+        android:text="Show"
+        android:visibility="gone"
+        tools:visibility="invisible" />
+
+
+    <com.mapbox.services.android.navigation.ui.v5.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        mapbox:navigationDarkTheme="@style/NavigationViewDark"
+        mapbox:navigationLightTheme="@style/NavigationViewLight" />
+
 
     <!--</LinearLayout>-->
 </FrameLayout>

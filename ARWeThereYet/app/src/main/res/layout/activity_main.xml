@@ -55,7 +55,7 @@
             android:layout_height="77dp"
             android:onClick="arClick"
             android:text="AR Nav"
-            android:visibility="visible"
+            android:visibility="invisible"
             tools:visibility="visible" />
     </LinearLayout>
     </com.mapbox.mapboxsdk.maps.MapView>
