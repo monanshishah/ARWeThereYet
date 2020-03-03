@@ -39,6 +39,7 @@ import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.collision.Ray;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
+import com.google.ar.sceneform.rendering.Color;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
@@ -269,10 +270,13 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        transformableNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
 //        arFragment.getArSceneView().getScene().addChild(anchorNode);
 //        transformableNode.select();
-
         Node node = new Node();
         node.setParent(arFragment.getArSceneView().getScene());
         node.setRenderable(modelRenderable);
+//        modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,85,0,1));
+        modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,255,255,1));
+        //modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(255,85,0,1));
+
         node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
             Camera camera = arFragment.getArSceneView().getScene().getCamera();
