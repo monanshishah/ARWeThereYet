@@ -99,6 +99,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     private DirectionsRoute currentRoute;
     private NavigationView navigationView;
 
+    ModelRenderable modelRenderableGlobal;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -270,6 +272,9 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        transformableNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
 //        arFragment.getArSceneView().getScene().addChild(anchorNode);
 //        transformableNode.select();
+
+
+        modelRenderableGlobal = modelRenderable;
         Node node = new Node();
         node.setParent(arFragment.getArSceneView().getScene());
         node.setRenderable(modelRenderable);
@@ -421,9 +426,17 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         }
         else if(instruction.contains("left")){
             Log.i(TAG,"left");
+            Toast toast =
+                    Toast.makeText(ARPage.this, "left", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
         }
         else if (instruction.contains("right")){
             Log.i(TAG,"right");
+            Toast toast =
+                    Toast.makeText(ARPage.this, "right", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
         }
 
         //e.g. output to use: In 500 feet, you will arrive at your destination
