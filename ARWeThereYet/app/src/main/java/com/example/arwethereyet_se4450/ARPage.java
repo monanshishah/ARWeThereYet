@@ -379,7 +379,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
         Boolean angle = false;
 
-        Log.i(TAG,instruction);
+        Log.i(TAG, instruction);
         //route progress info did not appear useful with emulator + simulator combo
         //Log.i(TAG, routeProgress.toString());
 
