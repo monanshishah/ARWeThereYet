@@ -37,7 +37,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="goBackClick"
-        android:text="Back" />
+        android:text="Back"
+        android:background="@color/mapboxGrayLight"
+        android:textColor="@color/mapboxWhite"
+
+        />
 
 
     <com.mapbox.services.android.navigation.ui.v5.NavigationView
