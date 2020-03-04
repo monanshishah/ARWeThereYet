@@ -99,7 +99,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     private DirectionsRoute currentRoute;
     private NavigationView navigationView;
 
-    ModelRenderable modelRenderableGlobal;
+    private ModelRenderable modelRenderableGlobal;
+    private double bearing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +181,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 .milestoneEventListener(this)
                 .build();
 
-        Log.i(TAG,options.toString());
+        Log.i(TAG,currentRoute.toString());
         Log.i(TAG,navigationView.toString());
 
         navigationView.startNavigation(options);
@@ -277,12 +278,13 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
         Node node = new Node();
         node.setParent(arFragment.getArSceneView().getScene());
-        node.setRenderable(modelRenderable);
+        node.setRenderable(modelRenderableGlobal);
 //        modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,85,0,1));
         modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,255,255,1));
         //modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(255,85,0,1));
 
-        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
+        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 41f));
+
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
             Camera camera = arFragment.getArSceneView().getScene().getCamera();
             Ray ray = camera.screenPointToRay(1080/2f, 1920/2f);
