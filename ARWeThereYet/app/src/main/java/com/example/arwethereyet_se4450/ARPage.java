@@ -281,8 +281,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         node.setParent(arFragment.getArSceneView().getScene());
         node.setRenderable(modelRenderableGlobal);
 //        modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,85,0,1));
-        modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,255,255,1));
-        //modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(255,85,0,1));
+        modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(android.graphics.Color.rgb(255,89,0)));
 
         node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
