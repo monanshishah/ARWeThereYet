@@ -273,15 +273,9 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        transformableNode.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 227f));
 //        arFragment.getArSceneView().getScene().addChild(anchorNode);
 //        transformableNode.select();
-<<<<<<< HEAD
-
-
-        modelRenderableGlobal = modelRenderable;
-=======
 
         modelRenderableGlobal = modelRenderable;
 
->>>>>>> ae9cde7522e004a2345a509b821082daead86f1b
         Node node = new Node();
         node.setParent(arFragment.getArSceneView().getScene());
         node.setRenderable(modelRenderable);
