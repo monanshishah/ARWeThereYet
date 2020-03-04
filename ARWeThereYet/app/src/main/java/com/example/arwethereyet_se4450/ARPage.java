@@ -284,13 +284,13 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,255,255,1));
         //modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(255,85,0,1));
 
-        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 0f));
+        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
             Camera camera = arFragment.getArSceneView().getScene().getCamera();
             Ray ray = camera.screenPointToRay(1080/2f, 1920/2f);
             Vector3 newPosition = ray.getPoint(1f);
             node.setLocalPosition(newPosition);
-//            node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
+            node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         });
     }
 
@@ -412,14 +412,15 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
             }
             else if (instruction.contains("1st")){
                 Log.i(TAG, "round 1");
-                angle = true;
+                stepCounter++;
             }
             else if (instruction.contains("2nd")){
                 Log.i(TAG,"round 2");
+                stepCounter++;
             }
             else if (instruction.contains("3rd")){
                 Log.i(TAG, "round 3");
-                angle = true;
+                stepCounter++;
             }
         }
         //e.g. of output: Turn right, then turn left
@@ -431,7 +432,6 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
             else{
                 Log.i(TAG,"turn right first");
             }
-
             stepCounter++;
         }
         else if(instruction.contains("left")){

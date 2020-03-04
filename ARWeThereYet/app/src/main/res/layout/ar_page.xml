@@ -42,8 +42,8 @@
 
     <com.mapbox.services.android.navigation.ui.v5.NavigationView
         android:id="@+id/navigationView"
-        android:layout_width="161dp"
-        android:layout_height="109dp"
+        android:layout_width="238dp"
+        android:layout_height="205dp"
         android:layout_gravity="bottom"
         android:visibility="invisible"
         mapbox:navigationDarkTheme="@style/NavigationViewDark"
