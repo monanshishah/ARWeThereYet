@@ -101,7 +101,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     private Integer stepCounter = 0;
 
     private ModelRenderable modelRenderableGlobal;
-    private double bearing;
+    private float bearing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,13 +182,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 .milestoneEventListener(this)
                 .build();
 
-<<<<<<< HEAD
         Log.i(TAG,currentRoute.toString());
         Log.i(TAG,navigationView.toString());
-=======
-//        Log.i(TAG,options.toString());
-//        Log.i(TAG,navigationView.toString());
->>>>>>> 45cb1e047dd11609400378130e92accb36b6d8b6
 
         navigationView.startNavigation(options);
 
@@ -289,13 +284,13 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,255,255,1));
         //modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(255,85,0,1));
 
-        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 41f));
-
+        node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), 0f));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
             Camera camera = arFragment.getArSceneView().getScene().getCamera();
             Ray ray = camera.screenPointToRay(1080/2f, 1920/2f);
             Vector3 newPosition = ray.getPoint(1f);
             node.setLocalPosition(newPosition);
+//            node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         });
     }
 
@@ -392,6 +387,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         Log.i(TAG, routeProgress.upcomingStepPoints().toString());
         Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingBefore().toString());
         Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().toString());
+
+        bearing = routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().floatValue();
 
         //if the instruction contains distance then its not a sharp turn
         //will have to adjust for feet or metres (change localisation settings in mapbox)
