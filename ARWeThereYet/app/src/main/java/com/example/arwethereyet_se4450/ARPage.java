@@ -98,6 +98,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     //AR route
     private DirectionsRoute currentRoute;
     private NavigationView navigationView;
+    private Integer stepCounter = 0;
 
     ModelRenderable modelRenderableGlobal;
 
@@ -180,8 +181,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 .milestoneEventListener(this)
                 .build();
 
-        Log.i(TAG,options.toString());
-        Log.i(TAG,navigationView.toString());
+//        Log.i(TAG,options.toString());
+//        Log.i(TAG,navigationView.toString());
 
         navigationView.startNavigation(options);
 
@@ -381,7 +382,9 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
         Log.i(TAG, instruction);
         //route progress info did not appear useful with emulator + simulator combo
-        //Log.i(TAG, routeProgress.toString());
+        Log.i(TAG, routeProgress.upcomingStepPoints().toString());
+        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingBefore().toString());
+        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().toString());
 
         //if the instruction contains distance then its not a sharp turn
         //will have to adjust for feet or metres (change localisation settings in mapbox)
@@ -401,6 +404,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
             Log.i(TAG, "roundabout");
             if(instruction.contains("Exit the roundabout")){
                 Log.i(TAG,"roundabout exit make sharp right");
+                stepCounter++;
             }
             else if (instruction.contains("1st")){
                 Log.i(TAG, "round 1");
@@ -423,6 +427,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
             else{
                 Log.i(TAG,"turn right first");
             }
+
+            stepCounter++;
         }
         else if(instruction.contains("left")){
             Log.i(TAG,"left");
@@ -430,6 +436,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                     Toast.makeText(ARPage.this, "left", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
+
+            stepCounter++;
         }
         else if (instruction.contains("right")){
             Log.i(TAG,"right");
@@ -437,6 +445,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                     Toast.makeText(ARPage.this, "right", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
+
+            stepCounter++;
         }
 
         //e.g. output to use: In 500 feet, you will arrive at your destination
