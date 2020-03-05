@@ -287,7 +287,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
             Camera camera = arFragment.getArSceneView().getScene().getCamera();
-            Ray ray = camera.screenPointToRay(1080/2f, 1920/2f);
+            Ray ray = camera.screenPointToRay(1080/2f, 1920/1.5f);
             Vector3 newPosition = ray.getPoint(1f);
             node.setLocalPosition(newPosition);
             node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
