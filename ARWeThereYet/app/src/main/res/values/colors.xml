@@ -10,4 +10,8 @@
     <color name="mapboxPink">#ee4e8b</color>
     <color name="mapboxYellow">#d9d838</color>
     <color name="mapboxRed">#b43b71</color>
+    <color name="ARWeGrey">#c7c7cc</color>
+    <color name="ARWeDark">#191716</color>
+    <color name="ARWeOrange">#ff9a63</color>
+    <color name="ARWeDarkOrange">#ff5900</color>
 </resources>

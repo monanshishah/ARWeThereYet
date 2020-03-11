@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity"
+
+
+    android:id="@+id/bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:layout_marginBottom="30dp"
+    android:orientation="vertical"
+    android:visibility="invisible"
+    tools:visibility="visible"
+
+
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    app:behavior_hideable = "false"
+    app:behavior_peekHeight = "90dp">
+    <!--mapbox:layout_constraintBottom_toBottomOf="parent"-->
+    <!--    mapbox:layout_constraintStart_toStartOf="parent"-->
+    <!--    mapbox:layout_constraintTop_toTopOf="parent"-->
+
+
+    <TextView
+        android:id="@+id/up"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="^"
+        android:textColor="@color/ARWeOrange"
+        android:textStyle="bold"
+        android:textAlignment="center" />
+    <Button
+            android:id="@+id/button_ar_nav"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:onClick="arClick"
+            android:text="AR Nav"
+            android:background="@color/ARWeOrange"
+            android:textColor="@color/white"/>
+
+    <LinearLayout
+        android:id="@+id/info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/ARWeGrey"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/info_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/ARWeDark"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="@string/query_feature_marker_title" />
+
+        <TextView
+            android:id="@+id/info_feature_properties_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/ARWeDark"
+            android:textSize="12sp"
+            tools:text="Properties listed here" />
+    </LinearLayout>
+
+    </LinearLayout>

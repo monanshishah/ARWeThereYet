@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="info_window_title" type="id" />
-    <item name="info_window_feature_properties_list" type="id" />
+    <item name="info_title" type="id" />
+    <item name="info_feature_properties_list" type="id" />
+    <item name="info_layout" type="id"/>
 </resources>

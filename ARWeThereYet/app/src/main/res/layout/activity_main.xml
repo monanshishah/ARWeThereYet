@@ -16,16 +16,16 @@
         mapbox:mapbox_cameraZoom="14">
 
 
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:enabled="false"
-            android:text="Start navigation"
-            android:background="@color/mapboxGrayLight"
-            android:textColor="@color/mapboxWhite"
-            tools:ignore="MissingConstraints" />
+<!--        <Button-->
+<!--            android:id="@+id/startButton"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="50dp"-->
+<!--            android:enabled="false"-->
+<!--            android:text="Start navigation"-->
+<!--            android:background="@color/mapboxGrayLight"-->
+<!--            android:textColor="@color/mapboxWhite"-->
+<!--            tools:ignore="MissingConstraints" />-->
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_location_search"
@@ -34,30 +34,24 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:tint="@android:color/white"
-            app:backgroundTint="@color/colorPrimary"
+            app:backgroundTint="@color/ARWeDarkOrange"
             app:srcCompat="@android:drawable/ic_search_category_default"
             tools:ignore="MissingConstraints" />
 
 
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="500dp"
-        android:orientation="horizontal"
-        mapbox:layout_constraintBottom_toBottomOf="parent"
-        mapbox:layout_constraintStart_toStartOf="parent"
-        mapbox:layout_constraintTop_toTopOf="parent">
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
 
-        <Button
-            android:id="@+id/button_ar_nav"
-            android:layout_width="399dp"
-            android:layout_height="77dp"
-            android:onClick="arClick"
-            android:text="AR Nav"
-            android:visibility="invisible"
-            tools:visibility="visible" />
-    </LinearLayout>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="30dp">
+<!--            android:layout_marginTop="350dp"-->
+
+            <!-- include bottom sheet -->
+            <include layout="@layout/bottom_sheet" />
+
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </com.mapbox.mapboxsdk.maps.MapView>
 
 
