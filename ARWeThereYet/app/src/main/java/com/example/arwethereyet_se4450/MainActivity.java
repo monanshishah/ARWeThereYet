@@ -355,10 +355,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 getRoute(originPoint, destinationPoint);
 
 
+                // Convert LatLng coordinates to screen pixel and only query the rendered features.
+                handleQueryIcon(mapboxMap.getProjection().toScreenLocation(searchPoint));
+
                 //button.setEnabled(true);
                 //button.setBackgroundResource(R.color.mapboxBlue);
-                linearLayoutView.setVisibility(View.VISIBLE);
-                arButton.setVisibility(View.VISIBLE);
+                //linearLayoutView.setVisibility(View.VISIBLE);
+                //arButton.setVisibility(View.VISIBLE);
                 //upTextView.setVisibility(View.VISIBLE);
                 //titleTextView.setVisibility(View.VISIBLE);
                 //propertiesListTextView.setVisibility(View.VISIBLE);
@@ -400,6 +403,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private boolean handleClickIcon(PointF screenPoint) {
         List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint,"uwotest");
+        return checkInCustomMap(features,true);
+    }
+
+    private void handleQueryIcon(PointF screenPoint){
+        List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint,"uwotest");
+        checkInCustomMap(features,false);
+    }
+
+
+    public boolean checkInCustomMap(List<Feature> features, Boolean tf){
         if (!features.isEmpty()) {
             Feature feature = features.get(0);
 
@@ -410,9 +423,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //arButton.setEnabled(true);
                 arButton.setVisibility(View.VISIBLE);
                 linearLayoutView.setVisibility(View.VISIBLE);
+                upTextView.setVisibility(View.VISIBLE);
+                titleTextView.setVisibility(View.VISIBLE);
+                propertiesListTextView.setVisibility(View.VISIBLE);
                 return true;
             }
-        } else {
+        } else if(tf){
             Toast.makeText(this, getString(R.string.query_feature_no_properties_found), Toast.LENGTH_SHORT).show();
             //arButton.setEnabled(false);
             //arButton.setBackgroundColor(R.color.ARWeGrey);
@@ -420,7 +436,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //propertiesListTextView.setText("");
             linearLayoutView.setVisibility(View.INVISIBLE);
         }
+
+        else{
+            linearLayoutView.setVisibility(View.VISIBLE);
+            upTextView.setVisibility(View.INVISIBLE);
+            titleTextView.setVisibility(View.INVISIBLE);
+            propertiesListTextView.setVisibility(View.INVISIBLE);
+        }
         return false;
+
     }
 
     public void anotherFunction(FeatureCollection... params){
