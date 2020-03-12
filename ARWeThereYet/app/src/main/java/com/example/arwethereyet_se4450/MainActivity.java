@@ -4,6 +4,9 @@ package com.example.arwethereyet_se4450;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 
@@ -15,6 +18,8 @@ import android.graphics.Color;
 import android.graphics.PointF;
 
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +39,7 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
@@ -116,6 +122,7 @@ import retrofit2.Response;
 
 import com.mapbox.api.geocoding.v5.GeocodingCriteria;
 
+import org.jetbrains.annotations.NotNull;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
@@ -169,8 +176,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+        if (!isConnected()) {
+
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Internet Connection Alert")
+                    .setMessage("Please check your internet connection")
+                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .show();
+
+        }
+
 
     }
+
+    boolean isConnected() {
+        // Checking internet connectivity
+        ConnectivityManager connectivityMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityMgr.getActiveNetworkInfo();
+
+        return activeNetwork!=null && activeNetwork.isConnected();
+    }
+
+
 
     public void arClick(View view){
 
@@ -650,6 +684,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         NavigationRoute.builder(this)
                 .accessToken(Mapbox.getAccessToken())
                 .origin(origin)
+                .profile(DirectionsCriteria.PROFILE_WALKING)
                 .destination(destination)
                 .build()
                 .getRoute(new Callback<DirectionsResponse>() {

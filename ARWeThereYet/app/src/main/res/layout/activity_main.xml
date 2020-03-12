@@ -27,6 +27,7 @@
             android:textColor="@color/mapboxWhite"
             tools:ignore="MissingConstraints" />
 
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_location_search"
             android:layout_width="wrap_content"
@@ -34,30 +35,30 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:tint="@android:color/white"
+            android:translationX="-850px"
             app:backgroundTint="@color/colorPrimaryDarkOrange"
             app:srcCompat="@android:drawable/ic_search_category_default"
             tools:ignore="MissingConstraints" />
 
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="123dp"
+            android:layout_marginTop="500dp"
+            android:orientation="horizontal"
+            mapbox:layout_constraintBottom_toBottomOf="parent"
+            mapbox:layout_constraintStart_toStartOf="parent"
+            mapbox:layout_constraintTop_toTopOf="parent">
 
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="500dp"
-        android:orientation="horizontal"
-        mapbox:layout_constraintBottom_toBottomOf="parent"
-        mapbox:layout_constraintStart_toStartOf="parent"
-        mapbox:layout_constraintTop_toTopOf="parent">
-
-        <Button
-            android:id="@+id/button_ar_nav"
-            android:layout_width="399dp"
-            android:layout_height="77dp"
-            android:onClick="arClick"
-            android:text="AR Nav"
-            android:visibility="invisible"
-            tools:visibility="visible" />
-    </LinearLayout>
+            <Button
+                android:id="@+id/button_ar_nav"
+                android:layout_width="399dp"
+                android:layout_height="77dp"
+                android:onClick="arClick"
+                android:text="AR Nav"
+                android:visibility="invisible"
+                tools:visibility="visible" />
+        </LinearLayout>
     </com.mapbox.mapboxsdk.maps.MapView>
 
 
