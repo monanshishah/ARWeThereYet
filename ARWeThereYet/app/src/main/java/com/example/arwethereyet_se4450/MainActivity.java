@@ -551,12 +551,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                 locationComponent.getLastKnownLocation().getLatitude());
-<<<<<<< HEAD
 
         getRoute(originPoint, destinationPoint);
-=======
->>>>>>> 618e76f1457be7256c9d950216da497fcdf798e2
-
+        
         if(handleClickIcon(mapboxMap.getProjection().toScreenLocation(point))){
             getRoute(originPoint, destinationPoint);
         }else{
