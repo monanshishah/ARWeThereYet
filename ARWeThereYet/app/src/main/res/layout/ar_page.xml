@@ -37,7 +37,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="goBackClick"
-        android:text="Back" />
+        android:text="Exit Navigation"
+        android:background="@color/ARWeDark"
+        android:textColor="@color/white"/>
 
 
     <com.mapbox.services.android.navigation.ui.v5.NavigationView
@@ -45,7 +47,7 @@
         android:layout_width="238dp"
         android:layout_height="205dp"
         android:layout_gravity="bottom"
-        android:visibility="invisible"
+        android:visibility="visible"
         mapbox:navigationDarkTheme="@style/NavigationViewDark"
         mapbox:navigationLightTheme="@style/NavigationViewLight" />
 
