@@ -8,4 +8,6 @@
     <string name="click_on_map_instruction">Select Place on Map</string>
     <string name="query_feature_no_properties_found">Query Feat - No properties Error Msg</string>
     <string name="query_feature_marker_title">Marker Title</string>
+    <string name="tracking_enabled">Tracking Enabled</string>
+    <string name="tracking_already_enabled">Tracking Already Enabled</string>
 </resources>

@@ -46,6 +46,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
+import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -59,6 +60,7 @@ import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -118,7 +120,7 @@ import com.mapbox.api.geocoding.v5.GeocodingCriteria;
 
 
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener, OnCameraTrackingChangedListener {
 
 
     private MapView mapView;
@@ -130,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationEngine locationEngine;
     private static final long DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L;
     private static final long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
+    private boolean isInTrackingMode;
 
     //specific var for pin query
     private static final String GEOJSON_SOURCE_ID = "GEOJSON_SOURCE_ID";//"ck58iqryj01px2nk0t6mca66g";
@@ -154,11 +157,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static DirectionsRoute currentRoute;
     private static final String TAG = "DirectionsActivity";
     private NavigationMapRoute navigationMapRoute;
+    private List<Point> waypoints = new ArrayList<Point>();
 
     // variables needed to initialize navigation
     private Button button;
     private Button arButton;
-
 
 
     @Override
@@ -413,8 +416,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //supposedly black icon/marker is an emulator issue, alt has to deal with deprecation of Marker
 
         Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+
         Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                 locationComponent.getLastKnownLocation().getLatitude());
+
         getRoute(originPoint, destinationPoint);
 
         button.setEnabled(true);
@@ -422,6 +427,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         arButton.setVisibility(View.VISIBLE);
 
         return handleClickIcon(mapboxMap.getProjection().toScreenLocation(point));
+    }
+
+    /**
+     * Building a multiple stop route
+     */
+
+    public void addStopToRoute(){
+
+    }
+
+    public void buildRoute(Point origin, Point destination) {
+        NavigationRoute.Builder builder = NavigationRoute.builder(this)
+                .accessToken(Mapbox.getAccessToken())
+                .origin(origin)
+                .destination(destination);
+
+        for (Point waypoint : waypoints) {
+            builder.addWaypoint(waypoint);
+        }
+
+        builder.build();
     }
 
 
@@ -502,7 +528,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
-
      * Utility class to generate Bitmaps for Symbol.
      */
     private static class SymbolGenerator {
@@ -604,12 +629,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             // Set the component's render mode
             locationComponent.setRenderMode(RenderMode.COMPASS);
-//
-//            initLocationEngine();
+
+            // Add the camera tracking listener. Fires if the map camera is manually moved.
+            locationComponent.addOnCameraTrackingChangedListener(this);
+
+            findViewById(R.id.back_to_camera_tracking_mode).setOnClickListener(view -> {
+                if (!isInTrackingMode) {
+                    isInTrackingMode = true;
+                    locationComponent.setCameraMode(CameraMode.TRACKING);
+                    locationComponent.zoomWhileTracking(16f);
+                    Toast.makeText(MainActivity.this, getString(R.string.tracking_enabled),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, getString(R.string.tracking_already_enabled),
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(this);
         }
+    }
+
+    @Override
+    public void onCameraTrackingDismissed() {
+        isInTrackingMode = false;
+    }
+
+    @Override
+    public void onCameraTrackingChanged(int currentMode) {
+
     }
 
     @Override
