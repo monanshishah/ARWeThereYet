@@ -156,7 +156,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 .thenAccept(modelRenderable -> addModelToScene(modelRenderable))
                 .exceptionally(throwable -> {
                     Toast toast =
-                            Toast.makeText(ARPage.this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+                            Toast.makeText(ARPage.this, "Unable to load any renderable", Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
                     return null;
@@ -280,8 +280,10 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         Node node = new Node();
         node.setParent(arFragment.getArSceneView().getScene());
         node.setRenderable(modelRenderableGlobal);
-//        modelRenderable.getMaterial().setFloat4("baseColor", new Color(255,85,0,1));
+        //change colour of arrow
         modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(android.graphics.Color.rgb(255,89,0)));
+        //remove shadow
+        modelRenderable.setShadowCaster(false);
 
         node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
