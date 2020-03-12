@@ -4,6 +4,9 @@ package com.example.arwethereyet_se4450;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 
@@ -15,12 +18,17 @@ import android.graphics.Color;
 import android.graphics.PointF;
 
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import android.widget.Toast;
@@ -34,6 +42,7 @@ import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
@@ -118,6 +127,7 @@ import retrofit2.Response;
 
 import com.mapbox.api.geocoding.v5.GeocodingCriteria;
 
+import org.jetbrains.annotations.NotNull;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener, OnCameraTrackingChangedListener {
@@ -163,6 +173,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button button;
     private Button arButton;
 
+    //info popup
+    private LinearLayout linearLayoutView;
+    private TextView titleTextView;
+    private TextView propertiesListTextView;
+    private TextView upTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,8 +187,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+        if (!isConnected()) {
+
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Internet Connection Alert")
+                    .setMessage("Please check your internet connection")
+                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .show();
+
+        }
+
 
     }
+
+    boolean isConnected() {
+        // Checking internet connectivity
+        ConnectivityManager connectivityMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityMgr.getActiveNetworkInfo();
+
+        return activeNetwork!=null && activeNetwork.isConnected();
+    }
+
+
 
     public void arClick(View view){
 
@@ -198,17 +240,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mapboxMap.addOnMapClickListener(MainActivity.this);
                         Toast.makeText(MainActivity.this,
                                 getString(R.string.click_on_map_instruction), Toast.LENGTH_LONG).show();
-                        button = findViewById(R.id.startButton);
-                        button.setOnClickListener(v -> {
-                            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                                    .directionsRoute(currentRoute)
-                                    .shouldSimulateRoute(true)
-                                    .build();
-                            // Call this method with Context from within an Activity
-                            NavigationLauncher.startNavigation(MainActivity.this, options);
-                        });
+//                        button = findViewById(R.id.startButton);
+//                        button.setOnClickListener(v -> {
+//                            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+//                                    .directionsRoute(currentRoute)
+//                                    .shouldSimulateRoute(true)
+//                                    .build();
+//                            // Call this method with Context from within an Activity
+//                            NavigationLauncher.startNavigation(MainActivity.this, options);
+//                        });
 
                         arButton = findViewById(R.id.button_ar_nav);
+                        titleTextView = findViewById(R.id.info_title);
+                        linearLayoutView = findViewById(R.id.bottom_sheet);
+                        propertiesListTextView = findViewById(R.id.info_feature_properties_list);
+                        upTextView = findViewById(R.id.up);
                     }
         });
     }
@@ -345,9 +391,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         locationComponent.getLastKnownLocation().getLatitude());
                 getRoute(originPoint, destinationPoint);
 
-                button.setEnabled(true);
-                button.setBackgroundResource(R.color.mapboxBlue);
-                arButton.setVisibility(View.VISIBLE);
+
+                // Convert LatLng coordinates to screen pixel and only query the rendered features.
+                handleQueryIcon(mapboxMap.getProjection().toScreenLocation(searchPoint));
+
+                //button.setEnabled(true);
+                //button.setBackgroundResource(R.color.mapboxBlue);
+                //linearLayoutView.setVisibility(View.VISIBLE);
+                //arButton.setVisibility(View.VISIBLE);
+                //upTextView.setVisibility(View.VISIBLE);
+                //titleTextView.setVisibility(View.VISIBLE);
+                //propertiesListTextView.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -386,24 +440,102 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private boolean handleClickIcon(PointF screenPoint) {
         List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint,"uwotest");
+        return checkInCustomMap(features,true);
+    }
+
+    private void handleQueryIcon(PointF screenPoint){
+        List<Feature> features = mapboxMap.queryRenderedFeatures(screenPoint,"uwotest");
+        checkInCustomMap(features,false);
+    }
+
+
+    public boolean checkInCustomMap(List<Feature> features, Boolean tf){
         if (!features.isEmpty()) {
             Feature feature = features.get(0);
 
-            StringBuilder stringBuilder = new StringBuilder();
-
             if (feature.properties() != null) {
-                for (Map.Entry<String, JsonElement> entry : feature.properties().entrySet()) {
-                    // Log all the properties
-                    Log.i(TAG, String.format("%s = %s", entry.getKey(), entry.getValue()));
-                    stringBuilder.append(String.format("%s - %s", entry.getKey(), entry.getValue()));
+
+//                new GenerateViewIconTask(MainActivity.this).execute(FeatureCollection.fromFeature(feature));
+                anotherFunction(FeatureCollection.fromFeature(feature));
+                //arButton.setEnabled(true);
+                arButton.setVisibility(View.VISIBLE);
+                linearLayoutView.setVisibility(View.VISIBLE);
+                upTextView.setVisibility(View.VISIBLE);
+                titleTextView.setVisibility(View.VISIBLE);
+                propertiesListTextView.setVisibility(View.VISIBLE);
+                return true;
+            }
+        } else if(tf){
+            Toast.makeText(this, getString(R.string.query_feature_no_properties_found), Toast.LENGTH_SHORT).show();
+            //arButton.setEnabled(false);
+            //arButton.setBackgroundColor(R.color.ARWeGrey);
+            //titleTextView.setText("Invalid Attraction Selected");
+            //propertiesListTextView.setText("");
+            linearLayoutView.setVisibility(View.INVISIBLE);
+        }
+
+        else{
+            linearLayoutView.setVisibility(View.VISIBLE);
+            upTextView.setVisibility(View.INVISIBLE);
+            titleTextView.setVisibility(View.INVISIBLE);
+            propertiesListTextView.setVisibility(View.INVISIBLE);
+        }
+        return false;
+
+    }
+
+    public void anotherFunction(FeatureCollection... params){
+        Feature featureAtMapClickPoint;
+        if (params[0].features() != null) {
+            featureAtMapClickPoint = params[0].features().get(0);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            titleTextView.setText(getString(R.string.query_feature_marker_title));
+
+            if (featureAtMapClickPoint.properties() != null) {
+                String bldgCode = null, attractionType = null, entrance = null, etc = null;
+
+                for (Map.Entry<String, JsonElement> entry : featureAtMapClickPoint.properties().entrySet()) {
+                    Log.i(TAG, entry.getKey());
+                    if (entry.getKey().equals("name")) {
+                        String cleanName = entry.getValue().toString();
+                        cleanName = cleanName.replaceAll("^\"|\"$", "");
+                        titleTextView.setText(cleanName);
+                    } else if (entry.getKey().equals("attractionType")) {
+                        attractionType = entry.getValue().getAsString();
+                        attractionType = attractionType.replaceAll("[\\[\\]]", "");
+//                                cleanType = cleanType.replaceAll("^\"|\"$", "");
+                        attractionType = attractionType.replaceAll("\"", "");
+
+                    } else if (entry.getKey().equals("bldgCode")) {
+                        bldgCode = entry.getValue().getAsString();
+
+                    } else if (entry.getKey().equals("entrance")) {
+                        entrance = entry.getValue().getAsString();
+                    } else {
+                        etc = entry.getValue().getAsString();
+                    }
+
+                }
+                if (bldgCode != null) {
+                    stringBuilder.append(bldgCode);
                     stringBuilder.append(System.getProperty("line.separator"));
                 }
-                new GenerateViewIconTask(MainActivity.this).execute(FeatureCollection.fromFeature(feature));
+                if (attractionType != null) {
+                    stringBuilder.append(attractionType);
+                    stringBuilder.append(System.getProperty("line.separator"));
+                }
+                if (entrance != null) {
+                    stringBuilder.append(entrance);
+                    stringBuilder.append(System.getProperty("line.separator"));
+                }
+                if (etc != null) {
+                    stringBuilder.append(entrance);
+                }
+                propertiesListTextView.setText(stringBuilder.toString());
             }
-        } else {
-            Toast.makeText(this, getString(R.string.query_feature_no_properties_found), Toast.LENGTH_SHORT).show();
         }
-        return true;
+
     }
 
 
@@ -419,14 +551,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                 locationComponent.getLastKnownLocation().getLatitude());
+<<<<<<< HEAD
 
         getRoute(originPoint, destinationPoint);
+=======
+>>>>>>> 618e76f1457be7256c9d950216da497fcdf798e2
 
-        button.setEnabled(true);
-        button.setBackgroundResource(R.color.mapboxBlue);
-        arButton.setVisibility(View.VISIBLE);
+        if(handleClickIcon(mapboxMap.getProjection().toScreenLocation(point))){
+            getRoute(originPoint, destinationPoint);
+        }else{
+            // remove any prev route on the map
+            if (navigationMapRoute != null) {
+                navigationMapRoute.removeRoute();
+            }
+        }
 
-        return handleClickIcon(mapboxMap.getProjection().toScreenLocation(point));
+        return true;
+
+        //button.setEnabled(true);
+        //button.setBackgroundResource(R.color.mapboxBlue);
+//        arButton.setVisibility(View.VISIBLE);
+//        linearLayoutView.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -486,15 +631,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     StringBuilder stringBuilder = new StringBuilder();
 
                     BubbleLayout bubbleLayout = (BubbleLayout) inflater.inflate(R.layout.activity_main_win_sym, null);
-
+                    //tried to replace bubble with android component and it crashed
                     TextView titleTextView = bubbleLayout.findViewById(R.id.info_window_title);
                     titleTextView.setText(activity.getString(R.string.query_feature_marker_title));
 
                     if (featureAtMapClickPoint.properties() != null) {
+                        //see block from anotherfunction
                         for (Map.Entry<String, JsonElement> entry : featureAtMapClickPoint.properties().entrySet()) {
+
                             stringBuilder.append(String.format("%s - %s", entry.getKey(), entry.getValue()));
                             stringBuilder.append(System.getProperty("line.separator"));
                         }
+
 
                         TextView propertiesListTextView = bubbleLayout.findViewById(R.id.info_window_feature_properties_list);
                         propertiesListTextView.setText(stringBuilder.toString());
@@ -699,6 +847,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         NavigationRoute.builder(this)
                 .accessToken(Mapbox.getAccessToken())
                 .origin(origin)
+                .profile(DirectionsCriteria.PROFILE_WALKING)
                 .destination(destination)
                 .build()
                 .getRoute(new Callback<DirectionsResponse>() {
