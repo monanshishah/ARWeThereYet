@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryGrey">#c7c7c7</color>
-    <color name="colorPrimaryLightOrange">#ff9a63</color>
-    <color name="colorPrimaryDarkOrange">#ff5900</color>
-    <color name="colorPrimaryBlack">#191716</color>
-    <color name="colorPrimaryBlue">#0097a7</color>
     <color name="white">#FFFFFF</color>
     <color name="mapboxWhite">#ffffff</color>
     <color name="mapboxBlue">#4264fb</color>
@@ -16,4 +11,5 @@
     <color name="ARWeDark">#191716</color>
     <color name="ARWeOrange">#ff9a63</color>
     <color name="ARWeDarkOrange">#ff5900</color>
+    <color name="ARWeBlue">#0097a7</color>
 </resources>
