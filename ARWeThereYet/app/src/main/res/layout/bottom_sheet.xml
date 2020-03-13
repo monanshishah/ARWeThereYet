@@ -73,7 +73,7 @@
             android:layout_height="60dp"
             android:onClick="arClick"
             android:text="AR Nav"
-            android:background="@color/ARWeOrange"
+            android:background="@drawable/rectangle_button_light_orange"
             android:textColor="@color/white"/>
 
         <LinearLayout
