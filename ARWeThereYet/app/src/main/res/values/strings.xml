@@ -6,6 +6,12 @@
     <string name="new_location">location</string>
     <string name="styleURI">mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71</string>
     <string name="click_on_map_instruction">Select Place on Map</string>
+<<<<<<< HEAD
+    <string name="query_feature_no_properties_found">Invalid Selection</string>
+    <string name="query_feature_marker_title">Marker Title</string>
+    <string name="tracking_enabled">Tracking Enabled</string>
+    <string name="tracking_already_enabled">Tracking Already Enabled</string>
+=======
 
     <string name="tracking_enabled">Tracking Enabled</string>
     <string name="tracking_already_enabled">Tracking Already Enabled</string>
@@ -13,4 +19,5 @@
     <string name="query_feature_no_properties_found">Please select valid attraction site</string>
     <string name="query_feature_marker_title">Attraction</string>
 
+>>>>>>> 93be6b64c5d3982a715fe230d844e838efeaee14
 </resources>
