@@ -35,6 +35,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.JsonElement;
 import com.mapbox.android.core.location.LocationEngine;
@@ -66,6 +69,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -127,10 +131,8 @@ import retrofit2.Response;
 
 import com.mapbox.api.geocoding.v5.GeocodingCriteria;
 
-import org.jetbrains.annotations.NotNull;
 
-
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener, OnCameraTrackingChangedListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener, OnCameraTrackingChangedListener, MyRecyclerViewAdapter.ItemClickListener {
 
 
     private MapView mapView;
@@ -159,28 +161,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //pin query youtube
 //    private Location ogLoc;
-    private Point origindest;
+//    private Point origindest;
     private Marker destM;
 
     // variables for calculating and drawing a route
-    //changed private to public for current route
+    // changed private to public for current route
     public static DirectionsRoute currentRoute;
     private static final String TAG = "DirectionsActivity";
     private NavigationMapRoute navigationMapRoute;
-    private List<Point> waypoints = new ArrayList<Point>();
+    private List<Point> waypoints;
+    private Point origin;
+    private Point destination;
+
 
     // variables needed to initialize navigation
-    private Button button;
     private Button arButton;
 
-    //info popup
+    // info popup
     private LinearLayout linearLayoutView;
     private TextView titleTextView;
     private TextView propertiesListTextView;
     private TextView upTextView;
+    private Button addRouteButton;
+    private Button removeStopButton;
+
+    // list view
+    MyRecyclerViewAdapter adapter;
+    RecyclerView recyclerView;
+    private String waypointName;
+    private List<String> waypointNames;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        waypoints = new ArrayList<>();
+        waypointNames = new ArrayList<>();
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, getString(R.string.access_token));
         setContentView(R.layout.activity_main);
@@ -188,22 +202,65 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         if (!isConnected()) {
-
             new AlertDialog.Builder(this)
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Internet Connection Alert")
                     .setMessage("Please check your internet connection")
-                    .setPositiveButton("Close", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                            startActivity(getIntent());
-                        }
+                    .setPositiveButton("Close", (dialog, which) -> {
+                        finish();
+                        startActivity(getIntent());
                     })
                     .show();
-
         }
 
+        addRouteButton = findViewById(R.id.add_route_button);
+        addRouteButton.setVisibility(View.INVISIBLE);
+        addRouteButton.setOnClickListener(v -> {
+            if(destination != null) {
+                // Code here executes on main thread after user presses button
+                waypoints.add(destination);
+                Log.i("TAG", destination.toJson());
+                waypointNames.add(waypointName);
+//                adapter.notifyItemInserted(waypointNames.size() - 1);
+                buildRoute();
+            } else {
+                Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        removeStopButton = findViewById(R.id.remove_stop_button);
+        removeStopButton.setVisibility(View.INVISIBLE);
+        removeStopButton.setOnClickListener(v -> {
+            if(waypoints.size() > 1) {
+                waypoints.remove(waypoints.size() - 1);
+                waypointNames.remove(waypointNames.size() - 1);
+//                adapter.notifyItemRemoved(waypointNames.size() - 1);
+                buildRoute();
+            } else {
+                waypoints.remove(waypoints.size() - 1);
+                waypointNames.remove(waypointNames.size() - 1);
+//                adapter.notifyDataSetChanged();
+                navigationMapRoute.removeRoute();
+                linearLayoutView.setVisibility(View.INVISIBLE);
+                removeStopButton.setVisibility(View.INVISIBLE);
+                Toast.makeText(this, "Route is empty", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        // recycler view
+        recyclerView = findViewById(R.id.routeList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new MyRecyclerViewAdapter(this, waypointNames);
+        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+    }
+
+    private void populateRouteView(List<String> stopNames) {
+
+    }
+
+    private void createRouteList(List<Point> wpList) {
 
     }
 
@@ -218,7 +275,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     public void arClick(View view){
-
         Intent myIntent = new Intent(MainActivity.this, ARPage.class);
         //myIntent.putExtra("route", currentRoute); couldn't pass non customised object this way
         startActivity(myIntent);
@@ -348,6 +404,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    /**
+     * This is for the search bar
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -368,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         source.setGeoJson(FeatureCollection.fromFeatures(
                                 new Feature[] {Feature.fromJson(selectedCarmenFeature.toJson())}));
                     }
-
+                    Log.i(TAG, selectedCarmenFeature.toJson());
                     // Move map camera to the selected location
                     mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(
                             new CameraPosition.Builder()
@@ -389,11 +451,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                         locationComponent.getLastKnownLocation().getLatitude());
-                getRoute(originPoint, destinationPoint);
+
+//                getRoute(originPoint, destinationPoint);
 
 
                 // Convert LatLng coordinates to screen pixel and only query the rendered features.
-                handleQueryIcon(mapboxMap.getProjection().toScreenLocation(searchPoint));
+//                handleQueryIcon(mapboxMap.getProjection().toScreenLocation(searchPoint));
 
                 //button.setEnabled(true);
                 //button.setBackgroundResource(R.color.mapboxBlue);
@@ -448,7 +511,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         checkInCustomMap(features,false);
     }
 
-
     public boolean checkInCustomMap(List<Feature> features, Boolean tf){
         if (!features.isEmpty()) {
             Feature feature = features.get(0);
@@ -458,8 +520,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                new GenerateViewIconTask(MainActivity.this).execute(FeatureCollection.fromFeature(feature));
                 anotherFunction(FeatureCollection.fromFeature(feature));
                 //arButton.setEnabled(true);
-                arButton.setVisibility(View.VISIBLE);
-                linearLayoutView.setVisibility(View.VISIBLE);
+//                arButton.setVisibility(View.VISIBLE);
+//                linearLayoutView.setVisibility(View.VISIBLE);
                 upTextView.setVisibility(View.VISIBLE);
                 titleTextView.setVisibility(View.VISIBLE);
                 propertiesListTextView.setVisibility(View.VISIBLE);
@@ -471,7 +533,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //arButton.setBackgroundColor(R.color.ARWeGrey);
             //titleTextView.setText("Invalid Attraction Selected");
             //propertiesListTextView.setText("");
-            linearLayoutView.setVisibility(View.INVISIBLE);
         }
 
         else{
@@ -501,6 +562,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String cleanName = entry.getValue().toString();
                         cleanName = cleanName.replaceAll("^\"|\"$", "");
                         titleTextView.setText(cleanName);
+                        waypointName = cleanName;
                     } else if (entry.getKey().equals("attractionType")) {
                         attractionType = entry.getValue().getAsString();
                         attractionType = attractionType.replaceAll("[\\[\\]]", "");
@@ -541,55 +603,87 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
-        if(destM != null){
-            mapboxMap.removeMarker(destM);
-        }
-        destM = mapboxMap.addMarker(new MarkerOptions().position(point));
-        //supposedly black icon/marker is an emulator issue, alt has to deal with deprecation of Marker
 
-        Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-
-        Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                locationComponent.getLastKnownLocation().getLatitude());
-
-        getRoute(originPoint, destinationPoint);
-        
         if(handleClickIcon(mapboxMap.getProjection().toScreenLocation(point))){
-            getRoute(originPoint, destinationPoint);
-        }else{
-            // remove any prev route on the map
-            if (navigationMapRoute != null) {
-                navigationMapRoute.removeRoute();
+            if(destM != null){
+                mapboxMap.removeMarker(destM);
             }
+
+            destM = mapboxMap.addMarker(new MarkerOptions().position(point));
+
+            destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+
+            Point originPoint = origin = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                    locationComponent.getLastKnownLocation().getLatitude());
+
+            addRouteButton.setVisibility(View.VISIBLE);
+        }else{
+            if(waypoints.isEmpty()){
+                mapboxMap.removeMarker(destM);
+                linearLayoutView.setVisibility(View.INVISIBLE);
+            }
+            addRouteButton.setVisibility(View.INVISIBLE);
         }
-
         return true;
-
-        //button.setEnabled(true);
-        //button.setBackgroundResource(R.color.mapboxBlue);
-//        arButton.setVisibility(View.VISIBLE);
-//        linearLayoutView.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Building a multiple stop route
-     */
 
-    public void addStopToRoute(){
+    //Building Route
+    public void buildRoute() {
+        adapter.notifyDataSetChanged();
 
-    }
+        Point dest = waypoints.get(waypoints.size() - 1);
 
-    public void buildRoute(Point origin, Point destination) {
         NavigationRoute.Builder builder = NavigationRoute.builder(this)
                 .accessToken(Mapbox.getAccessToken())
                 .origin(origin)
-                .destination(destination);
+                .destination(dest)
+                .profile(DirectionsCriteria.PROFILE_WALKING);
 
         for (Point waypoint : waypoints) {
             builder.addWaypoint(waypoint);
+            Log.i(TAG, waypoint.toJson());
         }
 
-        builder.build();
+        builder.build()
+        .getRoute(new Callback<DirectionsResponse>() {
+            @Override
+            public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                // You can get the generic HTTP info about the response
+                Log.d(TAG, "Response code: " + response.code());
+                if (response.body() == null) {
+                    Log.e(TAG, "No routes found, make sure you set the right user and access token.");
+                    return;
+                } else if (response.body().routes().size() < 1) {
+                    Log.e(TAG, "No routes found");
+                    return;
+                }
+
+                currentRoute = response.body().routes().get(0);
+
+                // Draw the route on the map
+                if (navigationMapRoute != null) {
+                    navigationMapRoute.removeRoute();
+                } else {
+                    navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
+                }
+                navigationMapRoute.addRoute(currentRoute);
+
+                if(navigationMapRoute != null){
+                    linearLayoutView.setVisibility(View.VISIBLE);
+                    removeStopButton.setVisibility(View.VISIBLE);
+                } else {
+                    linearLayoutView.setVisibility(View.INVISIBLE);
+                    removeStopButton.setVisibility(View.INVISIBLE);
+                }
+            }
+
+
+            @Override
+            public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+                Log.e(TAG, "Error: " + throwable.getMessage());
+            }
+        });
     }
 
 
@@ -602,6 +696,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 style.addImages(imageMap);
             });
         }
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+
     }
 
 
@@ -878,7 +977,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 });
     }
-
-
 }
 
