@@ -533,6 +533,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //arButton.setBackgroundColor(R.color.ARWeGrey);
             //titleTextView.setText("Invalid Attraction Selected");
             //propertiesListTextView.setText("");
+            linearLayoutView.setVisibility(View.GONE);
         }
 
         else{
