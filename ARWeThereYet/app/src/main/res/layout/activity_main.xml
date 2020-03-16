@@ -40,7 +40,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/ARWeOrange" />
+
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="30dp">
+
+            <!-- include bottom sheet -->
             <include layout="@layout/bottom_sheet" />
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     </com.mapbox.mapboxsdk.maps.MapView>
 </androidx.constraintlayout.widget.ConstraintLayout>
