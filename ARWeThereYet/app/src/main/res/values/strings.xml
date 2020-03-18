@@ -6,10 +6,6 @@
     <string name="new_location">location</string>
     <string name="styleURI">mapbox://styles/aribasilone/ck5fo78du23jc1jo66i0hmm71</string>
     <string name="click_on_map_instruction">Select Place on Map</string>
-<<<<<<< HEAD
-
-=======
->>>>>>> 3542a338ca155addbf2b8e1d2316f2335d69c138
 
     <string name="tracking_enabled">Tracking Enabled</string>
     <string name="tracking_already_enabled">Tracking Already Enabled</string>
