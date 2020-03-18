@@ -22,6 +22,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
@@ -55,6 +57,7 @@ import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListene
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 
+import java.sql.Time;
 import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
@@ -102,6 +105,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     private ModelRenderable modelRenderableGlobal;
     private float bearing;
+    private TextView arArrivedText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +144,9 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        }
 
         arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+        arArrivedText = findViewById(R.id.arrivalText);
+
+
 
 //        arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdate);
 //
@@ -188,55 +195,6 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         navigationView.startNavigation(options);
 
     }
-
-
-
-//    private void renderModel() {
-//        ModelRenderable.builder()
-//                .setSource(ARPage.this, R.raw.arrow)
-//                .build()
-//                .thenAccept(modelRenderable -> addModelToScene(modelRenderable))
-//                .exceptionally(throwable -> {
-//                    Toast toast =
-//                            Toast.makeText(ARPage.this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-//                    toast.setGravity(Gravity.CENTER, 0, 0);
-//                    toast.show();
-//                    return null;
-//                });
-//    }
-
-        private void onUpdate (FrameTime frameTime){
-//
-////        if(isModelPlaced)
-////            return;
-//
-//            if(timerEnd == true){
-//                renderModel();
-//                timerEnd = false;
-//            }
-//
-//            Frame frame = arFragment.getArSceneView().getArFrame();
-//
-//            Collection<Plane> planes = frame.getUpdatedTrackables(Plane.class);
-//
-//            for(Plane plane : planes){
-//                Plane lastelement;
-//                lastelement = plane;
-//                if (lastelement.getTrackingState() == TrackingState.TRACKING) {
-//                    anchor = lastelement.createAnchor(lastelement.getCenterPose());
-//                    Log.d(TAG, "this is the plane:" + lastelement);
-//                }
-//            }
-
-
-        }
-//
-//    renderModel();
-//    }
-
-
-
-
 
     //onResume() register the accelerometer for listening the events
     protected void onResume() {
@@ -326,9 +284,6 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     public void onLocationChanged(@NotNull Location location) {
         speed =location.getSpeed();
-
-
-        Log.d(TAG, "*********************speed=" + speed);
     }
 
     @Override
@@ -367,6 +322,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     public void onNavigationFinished() {
 
         navigationView.stopNavigation();
+
     }
 
     @Override
@@ -452,6 +408,12 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
             toast.show();
 
             stepCounter++;
+        }
+        else if(instruction.contains("arrived")) {
+            arArrivedText.setVisibility(View.VISIBLE);
+            Log.i(TAG, "arrived");
+
+
         }
 
         //e.g. output to use: In 500 feet, you will arrive at your destination
