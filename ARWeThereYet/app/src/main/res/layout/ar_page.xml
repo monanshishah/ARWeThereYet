@@ -49,7 +49,7 @@
         android:layout_width="238dp"
         android:layout_height="205dp"
         android:layout_gravity="bottom"
-        android:visibility="visible"
+        android:visibility="invisible"
         mapbox:navigationDarkTheme="@style/NavigationViewDark"
         mapbox:navigationLightTheme="@style/NavigationViewLight" />
 

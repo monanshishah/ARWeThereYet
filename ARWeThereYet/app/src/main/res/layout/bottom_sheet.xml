@@ -4,51 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity"
-
-
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
     android:layout_marginBottom="30dp"
     android:orientation="vertical"
-
-
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     app:behavior_hideable = "false"
     app:behavior_peekHeight = "250dp">
-    <!--mapbox:layout_constraintBottom_toBottomOf="parent"-->
-    <!--    mapbox:layout_constraintStart_toStartOf="parent"-->
-    <!--    mapbox:layout_constraintTop_toTopOf="parent"-->
 
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|end"
-        android:orientation="vertical">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/back_to_camera_tracking_mode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_marginRight="16dp"
-            app:srcCompat="@drawable/ic_my_location_black_24dp" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_location_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
-            android:tint="@android:color/white"
-
-            app:backgroundTint="@color/ARWeDarkOrange"
-
-            app:srcCompat="@android:drawable/ic_search_category_default"
-            tools:ignore="MissingConstraints" /><!--                android:translationX="-850px"-->
-
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/bottom_sheet"
@@ -102,8 +66,5 @@
                 android:textSize="12sp"
                 tools:text="Properties listed here" />
         </LinearLayout>
-
     </LinearLayout>
-
-
-    </LinearLayout>
+</LinearLayout>
