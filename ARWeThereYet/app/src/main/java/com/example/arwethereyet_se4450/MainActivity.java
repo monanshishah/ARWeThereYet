@@ -182,10 +182,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView titleTextView;
     private TextView propertiesListTextView;
     private TextView upTextView;
-    private Button addRouteButton;
-    private Button removeStopButton;
+
 
     // list view
+    private Button addRouteButton;
+    private Button removeStopButton;
     MyRecyclerViewAdapter adapter;
     RecyclerView recyclerView;
     private String waypointName;
@@ -195,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         waypoints = new ArrayList<>();
         waypointNames = new ArrayList<>();
+
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, getString(R.string.access_token));
         setContentView(R.layout.activity_main);
@@ -220,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Code here executes on main thread after user presses button
                 waypoints.add(destination);
                 Log.i("TAG", destination.toJson());
+//                Log.i(TAG,waypointName);
                 waypointNames.add(waypointName);
 //                adapter.notifyItemInserted(waypointNames.size() - 1);
                 buildRoute();
@@ -241,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 waypointNames.remove(waypointNames.size() - 1);
 //                adapter.notifyDataSetChanged();
                 navigationMapRoute.removeRoute();
-                linearLayoutView.setVisibility(View.INVISIBLE);
+                linearLayoutView.setVisibility(View.GONE);
                 removeStopButton.setVisibility(View.INVISIBLE);
                 Toast.makeText(this, "Route is empty", Toast.LENGTH_LONG).show();
             }
@@ -452,11 +455,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                         locationComponent.getLastKnownLocation().getLatitude());
 
-//                getRoute(originPoint, destinationPoint);
+                getRoute(originPoint, destinationPoint);
 
 
                 // Convert LatLng coordinates to screen pixel and only query the rendered features.
-//                handleQueryIcon(mapboxMap.getProjection().toScreenLocation(searchPoint));
+                handleQueryIcon(mapboxMap.getProjection().toScreenLocation(searchPoint));
 
                 //button.setEnabled(true);
                 //button.setBackgroundResource(R.color.mapboxBlue);
@@ -520,8 +523,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                new GenerateViewIconTask(MainActivity.this).execute(FeatureCollection.fromFeature(feature));
                 anotherFunction(FeatureCollection.fromFeature(feature));
                 //arButton.setEnabled(true);
-//                arButton.setVisibility(View.VISIBLE);
-//                linearLayoutView.setVisibility(View.VISIBLE);
+                arButton.setVisibility(View.VISIBLE);
+                linearLayoutView.setVisibility(View.VISIBLE);
                 upTextView.setVisibility(View.VISIBLE);
                 titleTextView.setVisibility(View.VISIBLE);
                 propertiesListTextView.setVisibility(View.VISIBLE);
@@ -621,7 +624,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }else{
             if(waypoints.isEmpty()){
                 mapboxMap.removeMarker(destM);
-                linearLayoutView.setVisibility(View.INVISIBLE);
+                linearLayoutView.setVisibility(View.GONE);
             }
             addRouteButton.setVisibility(View.INVISIBLE);
         }
@@ -674,7 +677,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     linearLayoutView.setVisibility(View.VISIBLE);
                     removeStopButton.setVisibility(View.VISIBLE);
                 } else {
-                    linearLayoutView.setVisibility(View.INVISIBLE);
+                    linearLayoutView.setVisibility(View.GONE);
                     removeStopButton.setVisibility(View.INVISIBLE);
                 }
             }
