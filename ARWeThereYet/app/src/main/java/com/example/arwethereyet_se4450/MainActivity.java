@@ -543,6 +543,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         else{
+            bottomSheetBehavior.setPeekHeight(210);
             linearLayoutView.setVisibility(View.VISIBLE);
             upTextView.setVisibility(View.INVISIBLE);
             titleTextView.setVisibility(View.INVISIBLE);
@@ -580,7 +581,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         bldgCode = entry.getValue().getAsString();
 
                     } else if (entry.getKey().equals("entrance")) {
-                        entrance = entry.getValue().getAsString();
+                        String temp = entry.getValue().getAsString();
+                        if(temp=="true"){
+                            entrance="Open";
+                        }else{
+                            entrance="Closed for Season";
+                        }
                     } else {
                         etc = entry.getValue().getAsString();
                     }
@@ -591,15 +597,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     stringBuilder.append(System.getProperty("line.separator"));
                 }
                 if (attractionType != null) {
+                    stringBuilder.append("Attraction Type:\t");
                     stringBuilder.append(attractionType);
                     stringBuilder.append(System.getProperty("line.separator"));
                 }
                 if (entrance != null) {
+                    stringBuilder.append("Status:\t\t");
                     stringBuilder.append(entrance);
                     stringBuilder.append(System.getProperty("line.separator"));
                 }
                 if (etc != null) {
-                    stringBuilder.append(entrance);
+                    stringBuilder.append("");
                 }
                 propertiesListTextView.setText(stringBuilder.toString());
             }
@@ -624,6 +632,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     locationComponent.getLastKnownLocation().getLatitude());
 
             addRouteButton.setVisibility(View.VISIBLE);
+            if(waypoints.isEmpty()){
+                getRoute(origin, destination);
+            }
+
         }else{
             if(waypoints.isEmpty()){
                 mapboxMap.removeMarker(destM);
