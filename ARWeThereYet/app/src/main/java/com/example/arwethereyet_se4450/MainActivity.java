@@ -461,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 origin = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                         locationComponent.getLastKnownLocation().getLatitude());
 
-//                getRoute(originPoint, destinationPoint);
+                getRoute(origin, destination);
 
                 addRouteButton.setVisibility(View.VISIBLE);
 
@@ -619,10 +619,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
 
+        if(destM != null){
+            mapboxMap.removeMarker(destM);
+        }
+
         if(handleClickIcon(mapboxMap.getProjection().toScreenLocation(point))){
-            if(destM != null){
-                mapboxMap.removeMarker(destM);
-            }
 
             destM = mapboxMap.addMarker(new MarkerOptions().position(point));
 
@@ -638,7 +639,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }else{
             if(waypoints.isEmpty()){
-                mapboxMap.removeMarker(destM);
                 linearLayoutView.setVisibility(View.GONE);
             }
             addRouteButton.setVisibility(View.INVISIBLE);
