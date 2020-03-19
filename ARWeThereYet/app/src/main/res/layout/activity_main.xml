@@ -1,11 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/routeList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/ARWeOrange"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:elevation="10dp">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/remove_stop_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/remove_stop_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/routeList" />
+
+    <Button
+        android:id="@+id/add_route_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/add_stop_button_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/routeList" />
 
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
@@ -15,33 +48,8 @@
         mapbox:mapbox_cameraTargetLng="-81.2737336"
         mapbox:mapbox_cameraZoom="14"
         tools:layout_editor_absoluteX="-32dp"
-        tools:layout_editor_absoluteY="257dp">
-
-        <Button
-            android:id="@+id/add_route_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginLeft="28dp"
-            android:text="Add to Route"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/remove_stop_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginLeft="225dp"
-            android:text="Remove Last Stop"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/routeList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/ARWeOrange" >
-
-        </androidx.recyclerview.widget.RecyclerView>
+        tools:layout_editor_absoluteY="257dp"
+        android:elevation="0dp">
 
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -58,7 +66,6 @@
                 android:orientation="vertical"
                 app:layout_anchor="@+id/bottom_sheet"
                 app:layout_anchorGravity="right|top">
-
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/back_to_camera_tracking_mode"
@@ -84,19 +91,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom">
-
                 <!-- include bottom sheet -->
-
-
                 <include
                     android:id="@+id/bottom_sheet"
                     layout="@layout/bottom_sheet" />
 
-
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-
-
     </com.mapbox.mapboxsdk.maps.MapView>
 </androidx.constraintlayout.widget.ConstraintLayout>
