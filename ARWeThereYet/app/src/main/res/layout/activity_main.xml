@@ -40,50 +40,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/routeList" />
 
-<!--    <Button-->
-<!--        android:id="@+id/button_ar_nav"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="60dp"-->
-<!--        android:layout_marginBottom="24dp"-->
-<!--        android:background="@drawable/rectangle_button_light_orange"-->
-<!--        android:onClick="arClick"-->
-<!--        android:text="AR Nav"-->
-<!--        android:textColor="@color/white"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent" />-->
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/back_to_camera_tracking_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintBottom_toTopOf="@+id/button_ar_nav"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_my_location_black_24dp" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_location_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
-        android:tint="@android:color/white"
-        app:backgroundTint="@color/ARWeDarkOrange"
-        app:layout_constraintBottom_toTopOf="@+id/back_to_camera_tracking_mode"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_search_category_default" />
-
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        app:layout_constraintBottom_toBottomOf="parent">
-        <!-- include bottom sheet -->
-        <include layout="@layout/bottom_sheet" />
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
@@ -95,5 +51,52 @@
         tools:layout_editor_absoluteY="257dp"
         android:elevation="0dp">
 
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="30dp">
+
+            <LinearLayout
+                android:id="@+id/primaryWrap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:orientation="vertical"
+                app:layout_anchor="@+id/bottom_sheet"
+                app:layout_anchorGravity="right|top">
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/back_to_camera_tracking_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|top"
+                    android:layout_marginRight="16dp"
+                    app:srcCompat="@drawable/ic_my_location_black_24dp" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fab_location_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:tint="@android:color/white"
+                    app:backgroundTint="@color/ARWeDarkOrange"
+                    app:srcCompat="@android:drawable/ic_search_category_default" />
+
+            </LinearLayout>
+
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:id="@+id/cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+                <!-- include bottom sheet -->
+                <include
+                    android:id="@+id/bottom_sheet"
+                    layout="@layout/bottom_sheet" />
+
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </com.mapbox.mapboxsdk.maps.MapView>
 </androidx.constraintlayout.widget.ConstraintLayout>

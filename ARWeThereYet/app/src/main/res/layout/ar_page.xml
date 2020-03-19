@@ -20,17 +20,17 @@
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     tools:context=".ARPage">
 
+
+    <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:orientation="vertical" android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent">-->
+
+
     <fragment
         android:id="@+id/ux_fragment"
         android:name="com.google.ar.sceneform.ux.ArFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-
-<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:orientation="vertical" android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent">-->
-
 
     <Button
         android:id="@+id/myArButton"
@@ -52,6 +52,19 @@
         android:visibility="invisible"
         mapbox:navigationDarkTheme="@style/NavigationViewDark"
         mapbox:navigationLightTheme="@style/NavigationViewLight" />
+
+    <TextView
+        android:id="@+id/arrivalText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="You Have Arrived"
+        android:textAlignment="center"
+        android:visibility="invisible"
+        android:textSize="50dp"
+        android:layout_marginTop="30dp"
+        android:textColor="@color/ARWeDarkOrange"
+        android:fontFamily="sans-serif-medium"
+        />
 
 
     <!--</LinearLayout>-->

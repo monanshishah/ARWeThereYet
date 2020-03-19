@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.gson.JsonElement;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -182,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView titleTextView;
     private TextView propertiesListTextView;
     private TextView upTextView;
+    private BottomSheetBehavior bottomSheetBehavior;
 
 
     // list view
@@ -313,6 +315,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         linearLayoutView = findViewById(R.id.bottom_sheet);
                         propertiesListTextView = findViewById(R.id.info_feature_properties_list);
                         upTextView = findViewById(R.id.up);
+
+                        // init the bottom sheet behavior
+                        bottomSheetBehavior = BottomSheetBehavior.from(linearLayoutView);
+                        bottomSheetBehavior.setPeekHeight(0);
+
                     }
         });
     }
@@ -464,11 +471,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //button.setEnabled(true);
                 //button.setBackgroundResource(R.color.mapboxBlue);
-                //linearLayoutView.setVisibility(View.VISIBLE);
-                //arButton.setVisibility(View.VISIBLE);
-                //upTextView.setVisibility(View.VISIBLE);
-                //titleTextView.setVisibility(View.VISIBLE);
-                //propertiesListTextView.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -524,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                new GenerateViewIconTask(MainActivity.this).execute(FeatureCollection.fromFeature(feature));
                 anotherFunction(FeatureCollection.fromFeature(feature));
                 //arButton.setEnabled(true);
-                arButton.setVisibility(View.VISIBLE);
+                bottomSheetBehavior.setPeekHeight(280);
                 linearLayoutView.setVisibility(View.VISIBLE);
                 upTextView.setVisibility(View.VISIBLE);
                 titleTextView.setVisibility(View.VISIBLE);
