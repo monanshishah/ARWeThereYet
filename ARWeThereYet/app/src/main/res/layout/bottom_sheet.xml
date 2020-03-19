@@ -57,9 +57,10 @@
             android:layout_height="wrap_content"
             android:textColor="@color/ARWeDark"
             android:layout_marginLeft="38sp"
-            android:textSize="12sp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
             tools:text="Properties listed here" />
-
     </LinearLayout>
 
 </LinearLayout>
