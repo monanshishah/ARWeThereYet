@@ -133,7 +133,7 @@ import retrofit2.Response;
 import com.mapbox.api.geocoding.v5.GeocodingCriteria;
 
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener, OnCameraTrackingChangedListener, MyRecyclerViewAdapter.ItemClickListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, PermissionsListener, MapboxMap.OnMapClickListener, OnCameraTrackingChangedListener {
 
 
     private MapView mapView;
@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             } else {
                 waypoints.remove(waypoints.size() - 1);
                 waypointNames.remove(waypointNames.size() - 1);
-//                adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
                 navigationMapRoute.removeRoute();
                 linearLayoutView.setVisibility(View.GONE);
                 removeStopButton.setVisibility(View.INVISIBLE);
@@ -256,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         recyclerView = findViewById(R.id.routeList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MyRecyclerViewAdapter(this, waypointNames);
-        adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
     }
@@ -457,12 +456,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 LatLng searchPoint = new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
                         ((Point) selectedCarmenFeature.geometry()).longitude());
 
-                Point destinationPoint = Point.fromLngLat(searchPoint.getLongitude(), searchPoint.getLatitude());
+                destination = Point.fromLngLat(searchPoint.getLongitude(), searchPoint.getLatitude());
 
-                Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                origin = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                         locationComponent.getLastKnownLocation().getLatitude());
 
-                getRoute(originPoint, destinationPoint);
+//                getRoute(originPoint, destinationPoint);
+
+                addRouteButton.setVisibility(View.VISIBLE);
 
 
                 // Convert LatLng coordinates to screen pixel and only query the rendered features.
@@ -714,11 +715,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 style.addImages(imageMap);
             });
         }
-    }
-
-    @Override
-    public void onItemClick(View view, int position) {
-
     }
 
 
