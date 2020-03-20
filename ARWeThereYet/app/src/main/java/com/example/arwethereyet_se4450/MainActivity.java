@@ -166,13 +166,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker destM;
 
     // variables for calculating and drawing a route
-    // changed private to public for current route
+    // changed private to public to access from ARPage
     public static DirectionsRoute currentRoute;
     private static final String TAG = "DirectionsActivity";
-    private NavigationMapRoute navigationMapRoute;
-    private List<Point> waypoints;
-    private Point origin;
-    private Point destination;
+    public NavigationMapRoute navigationMapRoute;
+    public static List<Point> waypoints;
+    public Point origin;
+    public Point destination;
 
 
     // variables needed to initialize navigation
