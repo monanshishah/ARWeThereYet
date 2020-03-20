@@ -163,10 +163,10 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 .build()
                 .thenAccept(modelRenderable -> addModelToScene(modelRenderable))
                 .exceptionally(throwable -> {
-                    Toast toast =
-                            Toast.makeText(ARPage.this, "Unable to load any renderable", Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
+//                    Toast toast =
+//                            Toast.makeText(ARPage.this, "Unable to load any renderable", Toast.LENGTH_LONG);
+//                    toast.setGravity(Gravity.CENTER, 0, 0);
+//                    toast.show();
                     return null;
                 });
 
@@ -357,17 +357,17 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
         //will have to adjust for feet or metres (change localisation settings in mapbox)
         
-        if (instruction.contains("arrive")) {
+        if (instruction.contains("arrived")) {
 //            waypoints = MainActivity.waypoints;
             //set visible when arrived
-            Log.i(TAG, "arrived");
+            Log.i(TAG, "You have arrived");
             arArrivedText.setVisibility(View.VISIBLE);
 
             final Handler arrivalhandler = new Handler();
             arrivalhandler.postDelayed(() -> {
                 //after a few seconds, make arrived text invisible
                 arArrivedText.setVisibility(View.INVISIBLE);
-            }, 3000);
+            }, 5000);
 
 
         }
