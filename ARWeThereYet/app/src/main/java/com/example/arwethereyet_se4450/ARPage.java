@@ -339,89 +339,31 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
 
         Log.i(TAG, instruction);
-        //Log.i(TAG, stepCounter.toString());
         Log.i(TAG, Integer.toString(routeProgress.currentLegProgress().stepIndex()));
+
         stepCounter=routeProgress.currentLegProgress().stepIndex();
         Log.i(TAG,routeProgress.currentLegProgress().currentStep().toString());
-        //Turn left, then keep right at the fork
-        // Keep right at the fork, then turn right results in stepcount + and turn left first?
+//        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingBefore().toString());
+//        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().toString());
+//        Log.i(TAG, routeProgress.currentLeg().steps().toString());
+        if(routeProgress.currentLegProgress().previousStep()!=null){
+            Log.i(TAG,routeProgress.currentLegProgress().previousStep().toString());
+        }
+        if (routeProgress.currentLegProgress().upComingStep() != null) {
+            Log.i(TAG, routeProgress.currentLegProgress().upComingStep().toString());
+        }
 
-        //route progress info did not appear useful with emulator + simulator combo
-        Log.i(TAG, routeProgress.upcomingStepPoints().toString());
-//        Log.i(TAG, Integer.toString(routeProgress.upcomingStepPoints().size()));
-//        Log.i(TAG, Integer.toString(routeProgress.currentLeg().steps().size()));
 
-        //Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingBefore().toString());
-        //Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().toString());
 
         bearing = routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().floatValue();
 
-        //if the instruction contains distance then its not a sharp turn
+
         //will have to adjust for feet or metres (change localisation settings in mapbox)
-        if(instruction.contains("0") || instruction.contains ("feet") || instruction.contains("metres")){
-            Log.i(TAG, "distance");
-            return;
-        }
-        if(instruction.contains("Continue on")){
-            //no change do nothing
-            return;
-        }
 
-        //roundabout has 1st exit (right angle), has 2nd exit (straight), 3rd exit (left angle)
-        if(instruction.contains("roundabout")){
-            Log.i(TAG, "roundabout");
-            if(instruction.contains("Exit the roundabout")){
-                Log.i(TAG,"roundabout exit make sharp right");
-                //stepCounter++;
-            }
-            else if (instruction.contains("1st")){
-                Log.i(TAG, "round 1");
-                //stepCounter++;
-            }
-            else if (instruction.contains("2nd")){
-                Log.i(TAG,"round 2");
-                //stepCounter++;
-            }
-            else if (instruction.contains("3rd")){
-                Log.i(TAG, "round 3");
-                //stepCounter++;
-            }
-        }
-        //e.g. of output: Turn right, then turn left
-        else if (instruction.contains("then turn")){
-//            did not account for turn right, then turn right or turn left, then turn left
-//            if (instruction.indexOf("left")< instruction.indexOf("right")){
-//                //turning left before right
-//                Log.i(TAG, "turn left first");
-//            }
-//            else{
-//                Log.i(TAG,"turn right first");
-//            }
-            //stepCounter++;
-        }
-        else if(instruction.contains("left")){
-            Log.i(TAG,"left");
-            Toast toast =
-                    Toast.makeText(ARPage.this, "left", Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
 
-            //stepCounter++;
-        }
-        else if (instruction.contains("right")){
-            Log.i(TAG,"right");
-            Toast toast =
-                    Toast.makeText(ARPage.this, "right", Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
-
-            //stepCounter++;
-        }
-        else if(instruction.contains("arrived")) {
+        if(instruction.contains("arrived")) {
             arArrivedText.setVisibility(View.VISIBLE);
             Log.i(TAG, "arrived");
-
-
         }
 
         //e.g. output to use: In 500 feet, you will arrive at your destination
