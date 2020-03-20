@@ -10,6 +10,6 @@
     <string name="tracking_already_enabled">Tracking Already Enabled</string>
     <string name="query_feature_no_properties_found">Please select valid attraction site</string>
     <string name="query_feature_marker_title">Attraction</string>
-    <string name="add_stop_button_text">Add Stop</string>
-    <string name="remove_stop_text">Remove Stop</string>
+    <string name="add_stop_button_text"> Add Stop </string>
+    <string name="remove_stop_text"> Remove Stop </string>
 </resources>

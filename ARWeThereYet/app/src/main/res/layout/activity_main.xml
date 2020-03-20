@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
+        android:background="@drawable/rectangle_button_lightgrey"
         android:text="@string/remove_stop_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/routeList" />
@@ -36,6 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
+        android:background="@drawable/rectangle_button_lightgrey"
         android:text="@string/add_stop_button_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/routeList" />
@@ -73,7 +75,9 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|top"
                     android:layout_marginRight="16dp"
-                    app:srcCompat="@drawable/ic_my_location_black_24dp" />
+                    app:srcCompat="@drawable/ic_my_location_black_24dp"
+                    app:backgroundTint="@color/ARWeDarkOrange"
+                    />
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/fab_location_search"

@@ -81,12 +81,14 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     private ArFragment arFragment;
 
+    public List<Point> waypoints;
 
     //detects movement
     private SensorManager sensorManager;
     private Sensor sensor;
     private TriggerEventListener triggerEventListener;
     private boolean isModelPlaced = false;
+
 
     //accelerometer
     private float xAxis = 0f;
@@ -96,7 +98,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     //anchor
     private Anchor anchor;
-    private boolean timerEnd= false;
+    private boolean timerEnd = false;
 
     //AR route
     private DirectionsRoute currentRoute;
@@ -147,7 +149,6 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         arArrivedText = findViewById(R.id.arrivalText);
 
 
-
 //        arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdate);
 //
 //        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -176,7 +177,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     }
 
-    private void navViewSetup(){
+    private void navViewSetup() {
         //get route from prev activity
         currentRoute = MainActivity.currentRoute;
         NavigationViewOptions options = NavigationViewOptions.builder()
@@ -189,8 +190,8 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 .milestoneEventListener(this)
                 .build();
 
-        Log.i(TAG,currentRoute.toString());
-        Log.i(TAG,navigationView.toString());
+        Log.i(TAG, currentRoute.toString());
+        Log.i(TAG, navigationView.toString());
 
         navigationView.startNavigation(options);
 
@@ -239,14 +240,14 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         node.setParent(arFragment.getArSceneView().getScene());
         node.setRenderable(modelRenderableGlobal);
         //change colour of arrow
-        modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(android.graphics.Color.rgb(255,89,0)));
+        modelRenderable.getMaterial().setFloat4("baseColorTint", new Color(android.graphics.Color.rgb(255, 89, 0)));
         //remove shadow
         modelRenderable.setShadowCaster(false);
 
         node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
         arFragment.getArSceneView().getScene().addOnUpdateListener(frameTime -> {
             Camera camera = arFragment.getArSceneView().getScene().getCamera();
-            Ray ray = camera.screenPointToRay(1080/2f, 1920/1.5f);
+            Ray ray = camera.screenPointToRay(1080 / 2f, 1920 / 1.5f);
             Vector3 newPosition = ray.getPoint(1f);
             node.setLocalPosition(newPosition);
             node.setLocalRotation(Quaternion.axisAngle(new Vector3(0, 1f, 0), bearing));
@@ -283,7 +284,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     @Override
     public void onLocationChanged(@NotNull Location location) {
-        speed =location.getSpeed();
+        speed = location.getSpeed();
     }
 
     @Override
@@ -302,8 +303,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     }
 
 
-
-    public void goBackClick(View view){
+    public void goBackClick(View view) {
         navigationView.stopNavigation();
         Intent myIntent = new Intent(ARPage.this, MainActivity.class);
         startActivity(myIntent);
@@ -349,70 +349,62 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
         //if the instruction contains distance then its not a sharp turn
         //will have to adjust for feet or metres (change localisation settings in mapbox)
-        if(instruction.contains("0") || instruction.contains ("feet") || instruction.contains("metres")){
+        if (instruction.contains("0") || instruction.contains("feet") || instruction.contains("metres")) {
             Log.i(TAG, "distance");
             //will have to angle arrow in corresponding direction
             angle = true;
             return;
         }
-        if(instruction.contains("Continue on")){
+        if (instruction.contains("Continue on")) {
             //no change do nothing
             return;
         }
 
         //roundabout has 1st exit (right angle), has 2nd exit (straight), 3rd exit (left angle)
-        if(instruction.contains("roundabout")){
+        if (instruction.contains("roundabout")) {
             Log.i(TAG, "roundabout");
-            if(instruction.contains("Exit the roundabout")){
-                Log.i(TAG,"roundabout exit make sharp right");
+            if (instruction.contains("Exit the roundabout")) {
+                Log.i(TAG, "roundabout exit make sharp right");
                 stepCounter++;
-            }
-            else if (instruction.contains("1st")){
+            } else if (instruction.contains("1st")) {
                 Log.i(TAG, "round 1");
                 stepCounter++;
-            }
-            else if (instruction.contains("2nd")){
-                Log.i(TAG,"round 2");
+            } else if (instruction.contains("2nd")) {
+                Log.i(TAG, "round 2");
                 stepCounter++;
-            }
-            else if (instruction.contains("3rd")){
+            } else if (instruction.contains("3rd")) {
                 Log.i(TAG, "round 3");
                 stepCounter++;
             }
         }
         //e.g. of output: Turn right, then turn left
-        else if (instruction.contains("then turn")){
-            if (instruction.indexOf("left")< instruction.indexOf("right")){
+        else if (instruction.contains("then turn")) {
+            if (instruction.indexOf("left") < instruction.indexOf("right")) {
                 //turning left before right
                 Log.i(TAG, "turn left first");
-            }
-            else{
-                Log.i(TAG,"turn right first");
+            } else {
+                Log.i(TAG, "turn right first");
             }
             stepCounter++;
-        }
-        else if(instruction.contains("left")){
-            Log.i(TAG,"left");
-            Toast toast =
-                    Toast.makeText(ARPage.this, "left", Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
+        } else if (instruction.contains("left")) {
+            Log.i(TAG, "left");
 
             stepCounter++;
-        }
-        else if (instruction.contains("right")){
-            Log.i(TAG,"right");
-            Toast toast =
-                    Toast.makeText(ARPage.this, "right", Toast.LENGTH_LONG);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
+        } else if (instruction.contains("right")) {
+            Log.i(TAG, "right");
 
             stepCounter++;
-        }
-        else if(instruction.contains("arrived")) {
-            arArrivedText.setVisibility(View.VISIBLE);
+        } else if (instruction.contains("arrive")) {
+//            waypoints = MainActivity.waypoints;
+            //set visible when arrived
             Log.i(TAG, "arrived");
+            arArrivedText.setVisibility(View.VISIBLE);
 
+            final Handler arrivalhandler = new Handler();
+            arrivalhandler.postDelayed(() -> {
+                //after a few seconds, make arrived text invisible
+                arArrivedText.setVisibility(View.INVISIBLE);
+            }, 3000);
 
         }
 
@@ -421,8 +413,12 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
         //could change colour of arrow to reflect near/at destination
 
 
-
     }
+}
+
+
+
+
 
 
     //AR line sample for reference
@@ -466,4 +462,5 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 //        return true;
 //    }
 
-}
+
+
