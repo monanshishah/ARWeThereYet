@@ -461,9 +461,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 origin = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
                         locationComponent.getLastKnownLocation().getLatitude());
 
-                getRoute(origin, destination);
 
                 addRouteButton.setVisibility(View.VISIBLE);
+                if(waypoints.isEmpty()){
+                    getRoute(origin, destination);
+                }
 
 
                 // Convert LatLng coordinates to screen pixel and only query the rendered features.
