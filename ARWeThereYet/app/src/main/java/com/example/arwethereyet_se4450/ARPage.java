@@ -321,7 +321,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
     @Override
     public void onNavigationFinished() {
 
-        navigationView.stopNavigation();
+        //navigationView.stopNavigation();
 
     }
 
@@ -337,18 +337,29 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
 
     @Override
     public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-        Boolean angle = false;
 
         Log.i(TAG, instruction);
-        //route progress info did not appear useful with emulator + simulator combo
-        Log.i(TAG, routeProgress.upcomingStepPoints().toString());
-        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingBefore().toString());
-        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().toString());
+        Log.i(TAG, Integer.toString(routeProgress.currentLegProgress().stepIndex()));
+
+        stepCounter=routeProgress.currentLegProgress().stepIndex();
+        Log.i(TAG,routeProgress.currentLegProgress().currentStep().toString());
+//        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingBefore().toString());
+//        Log.i(TAG, routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().toString());
+//        Log.i(TAG, routeProgress.currentLeg().steps().toString());
+        if(routeProgress.currentLegProgress().previousStep()!=null){
+            Log.i(TAG,routeProgress.currentLegProgress().previousStep().toString());
+        }
+        if (routeProgress.currentLegProgress().upComingStep() != null) {
+            Log.i(TAG, routeProgress.currentLegProgress().upComingStep().toString());
+        }
+
+
 
         bearing = routeProgress.currentLeg().steps().get(stepCounter).maneuver().bearingAfter().floatValue();
 
-        //if the instruction contains distance then its not a sharp turn
+
         //will have to adjust for feet or metres (change localisation settings in mapbox)
+
         if (instruction.contains("0") || instruction.contains("feet") || instruction.contains("metres")) {
             Log.i(TAG, "distance");
             //will have to angle arrow in corresponding direction
@@ -405,6 +416,7 @@ public class ARPage extends AppCompatActivity implements SensorEventListener, Lo
                 //after a few seconds, make arrived text invisible
                 arArrivedText.setVisibility(View.INVISIBLE);
             }, 3000);
+
 
         }
 
